@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const currentLevel = pr.escalationLevel;
     const coherentAmount = pr.amount === pr.plan.price;
 
-    if (coherentAmount && currentLevel === 0 && elapsed >= 3) {
+    if (coherentAmount && currentLevel === 0 && elapsed >= 10) {
       await prisma.paymentRequest.update({
         where: { id: paymentRequestId },
         data: { status: "validated", autoValidated: true, validatedAt: new Date(), escalationLevel: 3 },
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      return NextResponse.json({ level: 3, action: "auto_validated", message: "Montant cohérent — activation automatique après 3 min" });
+      return NextResponse.json({ level: 3, action: "auto_validated", message: "Montant cohérent — activation automatique après 10 min" });
     }
 
     if (!coherentAmount && elapsed >= 5 && currentLevel < 1) {

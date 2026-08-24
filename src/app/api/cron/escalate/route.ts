@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       const currentLevel = pr.escalationLevel;
       const coherentAmount = pr.amount === pr.plan.price;
 
-      if (coherentAmount && currentLevel === 0 && elapsed >= 3) {
+      if (coherentAmount && currentLevel === 0 && elapsed >= 10) {
         await prisma.paymentRequest.update({
           where: { id: pr.id },
           data: { status: "validated", autoValidated: true, validatedAt: new Date(), escalationLevel: 3 },

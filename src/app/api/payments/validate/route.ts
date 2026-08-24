@@ -31,6 +31,21 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "reject") {
+      const existingPayment = await prisma.payment.findFirst({
+        where: { userId: pr.userId, planId: pr.planId, status: "completed" },
+      });
+
+      if (existingPayment) {
+        await prisma.payment.delete({ where: { id: existingPayment.id } });
+
+        const sub = await prisma.subscription.findFirst({
+          where: { userId: pr.userId, planId: pr.planId, status: { in: ["active", "trial"] } },
+        });
+        if (sub) {
+          await prisma.subscription.delete({ where: { id: sub.id } });
+        }
+      }
+
       const updated = await prisma.paymentRequest.update({
         where: { id: paymentRequestId },
         data: {
@@ -38,6 +53,16 @@ export async function POST(req: NextRequest) {
           validatedByAdminId: adminId,
           validatedAt: new Date(),
           rejectionReason: rejectionReason || "Paiement non confirmé",
+        },
+      });
+
+      await prisma.notification.create({
+        data: {
+          userId: pr.userId,
+          type: "payment_rejected",
+          title: "Paiement refusé",
+          message: `Votre demande de paiement pour ${pr.plan.name} a été refusée. ${rejectionReason || ""}`,
+          data: JSON.stringify({ paymentRequestId, rejectionReason }),
         },
       });
 
@@ -49,11 +74,11 @@ export async function POST(req: NextRequest) {
           action: "payment_reject",
           entityType: "PaymentRequest",
           entityId: paymentRequestId,
-          newValue: JSON.stringify({ rejectionReason }),
+          newValue: JSON.stringify({ rejectionReason, rolledBackPayment: !!existingPayment }),
         },
       });
 
-      return NextResponse.json({ status: "rejected", id: updated.id });
+      return NextResponse.json({ status: "rejected", id: updated.id, rolledBack: !!existingPayment });
     }
 
     const existingSub = await prisma.subscription.findFirst({
