@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { ArrowLeft, ArrowRight, Upload, ImagePlus, Film, X } from "lucide-react";
 import Link from "next/link";
 
@@ -134,6 +135,7 @@ function VideoPreview({ src, onRemove }: { src: string; onRemove: () => void }) 
 }
 
 export default function PublierPage() {
+  const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(0);
@@ -549,6 +551,8 @@ export default function PublierPage() {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
+                    userId: (session?.user as any)?.id || null,
+                    domain: form.domain,
                     title: form.title,
                     description: form.description,
                     price: form.price || null,

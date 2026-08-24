@@ -130,6 +130,7 @@ export async function POST(request: NextRequest) {
     const {
       userId,
       categoryId,
+      domain,
       title,
       description,
       price,
@@ -162,6 +163,10 @@ export async function POST(request: NextRequest) {
     }
 
     let resolvedCategoryId = categoryId;
+    if (!resolvedCategoryId && domain) {
+      const cat = await prisma.category.findFirst({ where: { domain } });
+      resolvedCategoryId = cat?.id;
+    }
     if (!resolvedCategoryId) {
       const cat = await prisma.category.findFirst();
       resolvedCategoryId = cat?.id;
@@ -213,9 +218,11 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(listing, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erreur lors de la création de l'annonce";
+    console.error("[LISTINGS POST]", message);
     return NextResponse.json(
-      { error: "Erreur lors de la création de l'annonce" },
+      { error: message },
       { status: 500 }
     );
   }
