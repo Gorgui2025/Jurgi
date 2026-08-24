@@ -1,0 +1,222 @@
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+
+async function checkQuota(userId: string): Promise<{ allowed: boolean; maxListings: number; activeListings: number; planName: string }> {
+  const sub = await prisma.subscription.findFirst({
+    where: { userId, status: "active" },
+    include: { plan: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const plan = sub?.plan || await prisma.plan.findUnique({ where: { slug: "gratuit" } });
+  const maxListings = plan?.maxActiveListings || 3;
+  const planName = plan?.name || "Gratuit";
+
+  const activeListings = await prisma.listing.count({
+    where: { userId, status: "active" },
+  });
+
+  return { allowed: activeListings < maxListings, maxListings, activeListings, planName };
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const category = searchParams.get("category");
+  const region = searchParams.get("region");
+  const domain = searchParams.get("domain");
+  const search = searchParams.get("q");
+  const userId = searchParams.get("userId");
+  const allStatuses = searchParams.get("allStatuses");
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "20");
+  const skip = (page - 1) * limit;
+
+  const where: Record<string, unknown> = {};
+
+  if (!userId && !allStatuses) {
+    where.status = "active";
+    where.OR = [
+      { expiresAt: null },
+      { expiresAt: { gt: new Date() } },
+    ];
+  }
+
+  if (!userId && allStatuses) {
+    where.OR = [
+      { status: { notIn: ["expired", "suspended", "archived"] }, expiresAt: null },
+      { status: { notIn: ["expired", "suspended", "archived"] }, expiresAt: { gt: new Date() } },
+      { status: { in: ["expired", "suspended", "archived"] } },
+    ];
+  }
+
+  if (userId) {
+    where.userId = userId;
+    await prisma.listing.updateMany({
+      where: { userId, status: "active", expiresAt: { lt: new Date() } },
+      data: { status: "expired" },
+    });
+  }
+
+  if (category) {
+    const cat = await prisma.category.findUnique({ where: { slug: category } });
+    if (cat) where.categoryId = cat.id;
+  }
+
+  if (region) where.region = region;
+
+  if (domain) {
+    const cats = await prisma.category.findMany({ where: { domain } });
+    where.categoryId = { in: cats.map((c) => c.id) };
+  }
+
+  if (search) {
+    const searchNorm = search.toLowerCase()
+      .replace(/[éèêë]/g, "e").replace(/[àâä]/g, "a").replace(/[îï]/g, "i")
+      .replace(/[ôö]/g, "o").replace(/[ùûü]/g, "u").replace(/[ÿ]/g, "y").replace(/[ç]/g, "c");
+    const likePattern = "%" + searchNorm + "%";
+
+    const matchingListingIds = (
+      await prisma.$queryRaw<{ id: string }[]>`
+        SELECT DISTINCT L.id FROM Listing L
+        LEFT JOIN Category C ON L.categoryId = C.id
+        WHERE
+          LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+            L.title, 'é','e'), 'è','e'), 'ê','e'), 'ë','e'), 'à','a'), 'â','a'), 'ä','a'), 'î','i'), 'ï','i'), 'ô','o'), 'ö','o'), 'ù','u')
+          ) LIKE ${likePattern}
+          OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+            L.description, 'é','e'), 'è','e'), 'ê','e'), 'ë','e'), 'à','a'), 'â','a'), 'ä','a'), 'î','i'), 'ï','i'), 'ô','o'), 'ö','o'), 'ù','u')
+          ) LIKE ${likePattern}
+          OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+            L.species, 'é','e'), 'è','e'), 'ê','e'), 'ë','e'), 'à','a'), 'â','a'), 'ä','a'), 'î','i'), 'ï','i'), 'ô','o'), 'ö','o'), 'ù','u')
+          ) LIKE ${likePattern}
+          OR LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+            C.name, 'é','e'), 'è','e'), 'ê','e'), 'ë','e'), 'à','a'), 'â','a'), 'ä','a'), 'î','i'), 'ï','i'), 'ô','o'), 'ö','o'), 'ù','u')
+          ) LIKE ${likePattern}
+      `
+    ).map((l) => l.id);
+
+    where.id = { in: matchingListingIds };
+  }
+
+  const [listings, total] = await Promise.all([
+    prisma.listing.findMany({
+      where,
+      include: {
+        user: { select: { id: true, name: true, avatar: true, isVerified: true } },
+        category: { select: { name: true, slug: true, domain: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.listing.count({ where }),
+  ]);
+
+  return NextResponse.json({
+    listings,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  });
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    const {
+      userId,
+      categoryId,
+      title,
+      description,
+      price,
+      priceOnDemand,
+      species,
+      breed,
+      sex,
+      age,
+      weight,
+      quantity,
+      region,
+      commune,
+      contactMode,
+      healthInfo,
+      photos,
+      videos,
+    } = body;
+
+    if (!title || !description) {
+      return NextResponse.json(
+        { error: "Champs obligatoires manquants" },
+        { status: 400 }
+      );
+    }
+
+    let resolvedUserId = userId;
+    if (!resolvedUserId) {
+      const anyUser = await prisma.user.findFirst();
+      resolvedUserId = anyUser?.id;
+    }
+
+    let resolvedCategoryId = categoryId;
+    if (!resolvedCategoryId) {
+      const cat = await prisma.category.findFirst();
+      resolvedCategoryId = cat?.id;
+    }
+
+    if (!resolvedUserId || !resolvedCategoryId) {
+      return NextResponse.json(
+        { error: "Aucun utilisateur ou catégorie disponible" },
+        { status: 400 }
+      );
+    }
+
+    const quota = await checkQuota(resolvedUserId);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          error: "quota_reached",
+          message: `Limite atteinte (${quota.activeListings}/${quota.maxListings} annonces actives sur le plan ${quota.planName}). Passez à un offres supérieure pour publier davantage.`,
+          quota,
+        },
+        { status: 403 }
+      );
+    }
+
+    const listing = await prisma.listing.create({
+      data: {
+        userId: resolvedUserId,
+        categoryId: resolvedCategoryId,
+        title,
+        description,
+        price: price ? parseFloat(price) : null,
+        priceOnDemand: priceOnDemand || false,
+        photos: JSON.stringify(photos || []),
+        videos: JSON.stringify(videos || []),
+        species: species || null,
+        breed: breed || null,
+        sex: sex || null,
+        age: age || null,
+        weight: weight || null,
+        quantity: quantity ? parseInt(quantity) : null,
+        region: region || null,
+        commune: commune || null,
+        contactMode: contactMode || "phone_whatsapp",
+        healthInfo: healthInfo || null,
+        status: "active",
+        availability: "available",
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    return NextResponse.json(listing, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Erreur lors de la création de l'annonce" },
+      { status: 500 }
+    );
+  }
+}

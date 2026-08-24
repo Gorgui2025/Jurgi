@@ -1,0 +1,265 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("SQLITE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  phone         String?
+  phoneVerified Boolean
+  name          String?
+  email         String?
+  emailVerified Boolean
+  passwordHash  String?
+  avatar        String?
+  bio           String?
+  location      String?
+  region        String?
+  commune       String?
+  zones         String
+  roles         String
+  accountStatus String
+  isVerified    Boolean
+  verifiedLevel String
+  isOnline      Boolean
+  lastSeen      DateTime?
+  phoneVisible  Boolean
+  whatsapp      String?
+  resetToken    String?
+  resetTokenExpiry DateTime?
+  createdAt     DateTime
+  updatedAt     DateTime
+}
+
+model FarmProfile {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  farmType    String
+  species     String
+  size        String?
+  location    String?
+  region      String?
+  commune     String?
+  latitude    Float?
+  longitude   Float?
+  photos      String
+  videos      String
+  createdAt   DateTime
+  updatedAt   DateTime
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String
+  icon        String?
+  description String?
+  domain      String
+  parent_id   String?
+  sortOrder   Int
+  isActive    Boolean
+  createdAt   DateTime
+  updatedAt   DateTime
+}
+
+model Listing {
+  id              String   @id @default(cuid())
+  userId          String
+  categoryId      String
+  farmProfileId   String?
+  title           String
+  description     String
+  price           Float?
+  priceType       String
+  currency        String
+  priceOnDemand   Boolean
+  photos          String
+  videos          String
+  location        String?
+  region          String?
+  commune         String?
+  latitude        Float?
+  longitude       Float?
+  status          String
+  availability    String
+  contactMode     String
+  expiresAt       DateTime?
+  views           Int
+  featured        Boolean
+  species         String?
+  breed           String?
+  age             String?
+  weight          String?
+  sex             String?
+  quantity        Int?
+  healthInfo      String?
+  deliveryOptions String
+  createdAt       DateTime
+  updatedAt       DateTime
+}
+
+model Request {
+  id              String   @id @default(cuid())
+  userId          String
+  categoryId      String?
+  title           String
+  description     String
+  quantity        String?
+  budget          String?
+  location        String?
+  region          String?
+  commune         String?
+  deadline        String?
+  urgency         String
+  photos          String
+  status          String
+  visibility      String
+  contactMode     String
+  views           Int
+  expiresAt       DateTime?
+  createdAt       DateTime
+  updatedAt       DateTime
+}
+
+model RequestResponse {
+  id          String   @id @default(cuid())
+  requestId   String
+  userId      String
+  listingId   String?
+  message     String
+  price       Float?
+  status      String
+  createdAt   DateTime
+  updatedAt   DateTime
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  name      String?
+  isGroup   Boolean
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+model ConversationParticipant {
+  id              String @id @default(cuid())
+  conversationId  String
+  userId          String
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id              String   @id @default(cuid())
+  conversationId  String
+  senderId        String
+  content         String
+  read            Boolean
+  createdAt       DateTime
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  reviewerId  String
+  userId      String
+  rating      Int
+  comment     String?
+  createdAt   DateTime
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  reporterId  String
+  targetType  String
+  targetId    String
+  reason      String
+  description String?
+  status      String
+  resolution  String?
+  createdAt   DateTime
+  resolvedAt  DateTime?
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  title       String
+  message     String
+  data        String
+  read        Boolean
+  createdAt   DateTime
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String
+  entityType  String
+  entityId    String?
+  details     String
+  ipAddress   String?
+  createdAt   DateTime
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  userId      String
+  plan        String
+  status      String
+  startDate   DateTime
+  endDate     DateTime?
+  features    String
+  createdAt   DateTime
+  updatedAt   DateTime
+}
+
+model SiteConfig {
+  id        String   @id @default(cuid())
+  key       String
+  value     String
+  updatedAt DateTime
+}
+
+model Training {
+  id              String   @id @default(cuid())
+  title           String
+  provider        String
+  type            String
+  level           String
+  duration        String
+  format          String
+  price           String
+  location        String
+  date            String
+  maxParticipants Int
+  description     String
+  tags            String
+  createdAt       DateTime
+  updatedAt       DateTime
+}
+
+model TrainingEnrollment {
+  id          String   @id @default(cuid())
+  trainingId  String
+  userId      String?
+  name        String
+  phone       String
+  createdAt   DateTime
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  read      Boolean
+  createdAt DateTime
+}

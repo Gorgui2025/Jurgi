@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Nettoyage...</title></head>
+<body>
+<script>
+document.cookie.split(";").forEach(function(c) {
+  var name = c.trim().split("=")[0];
+  document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+  document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=localhost";
+  document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=localhost:3000";
+  document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/api";
+  document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/api/auth";
+});
+localStorage.clear();
+sessionStorage.clear();
+document.body.innerHTML = "<h2>Cookies et stockage nettoyés !</h2><p>Fermez votre navigateur, rouvrez-le, puis allez sur <a href='/connexion'>connexion</a></p>";
+</script>
+</body>
+</html>
