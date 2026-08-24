@@ -98,16 +98,28 @@ export default function ProfilPage() {
     }
   }, [session?.user]);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
       alert("L'image ne doit pas dépasser 2 Mo");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setAvatarPreview(reader.result as string);
-    reader.readAsDataURL(file);
+    setUploadingAvatar(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setAvatarPreview(data.url);
+      } else {
+        alert(data.error || "Erreur upload avatar");
+      }
+    } catch {
+      alert("Erreur réseau lors de l'upload");
+    }
+    setUploadingAvatar(false);
   };
 
   const handleSave = async () => {

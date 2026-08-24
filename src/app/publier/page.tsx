@@ -140,6 +140,7 @@ export default function PublierPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [showExtra, setShowExtra] = useState(false);
   const [form, setForm] = useState({
     domain: "",
@@ -343,10 +344,15 @@ export default function PublierPage() {
                 {form.photos.length < 6 && (
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="aspect-square border-2 border-dashed border-beigebrume-300 rounded-xl flex flex-col items-center justify-center gap-1 hover:border-baobab-400 hover:bg-vertbrume-50 transition-colors"
+                    disabled={uploadingImage}
+                    className="aspect-square border-2 border-dashed border-beigebrume-300 rounded-xl flex flex-col items-center justify-center gap-1 hover:border-baobab-400 hover:bg-vertbrume-50 transition-colors disabled:opacity-50"
                   >
-                    <ImagePlus className="w-6 h-6 text-charbon-200" />
-                    <span className="text-[11px] text-charbon-200">Ajouter</span>
+                    {uploadingImage ? (
+                      <span className="w-5 h-5 border-2 border-baobab-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <ImagePlus className="w-6 h-6 text-charbon-200" />
+                    )}
+                    <span className="text-[11px] text-charbon-200">{uploadingImage ? "Upload..." : "Ajouter"}</span>
                   </button>
                 )}
               </div>
@@ -356,17 +362,27 @@ export default function PublierPage() {
                 accept="image/*"
                 multiple
                 className="hidden"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const files = e.target.files;
                   if (!files) return;
-                  Array.from(files).forEach((file) => {
-                    if (form.photos.length >= 6) return;
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                      setForm((prev) => ({ ...prev, photos: [...prev.photos, ev.target?.result as string].slice(0, 6) }));
-                    };
-                    reader.readAsDataURL(file);
-                  });
+                  setUploadingImage(true);
+                  for (const file of Array.from(files)) {
+                    if (form.photos.length >= 6) break;
+                    try {
+                      const fd = new FormData();
+                      fd.append("file", file);
+                      const res = await fetch("/api/upload", { method: "POST", body: fd });
+                      const data = await res.json();
+                      if (res.ok && data.url) {
+                        setForm((prev) => ({ ...prev, photos: [...prev.photos, data.url].slice(0, 6) }));
+                      } else {
+                        alert(data.error || "Erreur upload image");
+                      }
+                    } catch {
+                      alert("Erreur réseau lors de l'upload");
+                    }
+                  }
+                  setUploadingImage(false);
                   e.target.value = "";
                 }}
               />
