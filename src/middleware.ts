@@ -13,7 +13,8 @@ export function middleware(req: NextRequest) {
     if (adminToken) return NextResponse.next();
 
     // Accept next-auth.session-token (normal login from /connexion)
-    const sessionToken = req.cookies.get("next-auth.session-token")?.value;
+    // In HTTPS, NextAuth adds __Secure- prefix
+    const sessionToken = req.cookies.get("next-auth.session-token")?.value || req.cookies.get("__Secure-next-auth.session-token")?.value;
     if (sessionToken) return NextResponse.next();
 
     return NextResponse.redirect(new URL("/connexion", req.url));
@@ -24,7 +25,7 @@ export function middleware(req: NextRequest) {
   const isProtected = protectedPaths.some(p => pathname === p) ||
     pathname.startsWith("/messages");
   if (isProtected) {
-    const token = req.cookies.get("next-auth.session-token")?.value;
+    const token = req.cookies.get("next-auth.session-token")?.value || req.cookies.get("__Secure-next-auth.session-token")?.value;
     if (!token) return NextResponse.redirect(new URL("/connexion", req.url));
   }
 
