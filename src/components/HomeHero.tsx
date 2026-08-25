@@ -11,15 +11,21 @@ export default function HomeHero({ stats }: { stats?: { users: number; listings:
   const [heroSearch, setHeroSearch] = useState("");
 
   return (
-    <section className="relative bg-baobab-600 text-white overflow-hidden min-h-[520px] flex items-center">
+    <section className="relative text-white overflow-hidden min-h-[560px] sm:min-h-[560px] md:min-h-[580px] flex items-center">
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1600&h=900&fit=crop"
-          alt=""
-          className="w-full h-full object-cover opacity-25"
+          src="/manus-storage/jurgi-hero-ecosystem_b1b8d6c9.png"
+          alt="Éleveur sénégalais au cœur de l'écosystème de l'élevage"
+          className="w-full h-full object-cover object-[center_right]"
           loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-baobab-700/95 via-baobab-600/85 to-baobab-600/70" />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(90deg, rgba(23,63,47,0.86) 0%, rgba(23,63,47,0.62) 38%, rgba(23,63,47,0.12) 76%, rgba(23,63,47,0) 100%)",
+          }}
+        />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-28 sm:pt-20 sm:pb-24 w-full">
