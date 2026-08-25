@@ -14,7 +14,6 @@ interface Listing {
   seller: string;
   verified: boolean;
   time: string;
-  hasVideo?: boolean;
 }
 
 export default function HomeListings({ listings }: { listings: Listing[] }) {
@@ -44,7 +43,6 @@ export default function HomeListings({ listings }: { listings: Listing[] }) {
             seller={listing.seller}
             verified={listing.verified}
             time={listing.time}
-            hasVideo={listing.hasVideo}
           />
         ))}
       </div>

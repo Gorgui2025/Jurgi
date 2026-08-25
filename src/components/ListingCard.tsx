@@ -8,7 +8,6 @@ import {
   BadgeCheck,
   CircleCheck,
   FileCheck,
-  Play,
 } from "lucide-react";
 import ImageWithFallback from "./ImageWithFallback";
 
@@ -24,7 +23,6 @@ interface ListingCardProps {
   verifiedLevel?: "phone" | "identity" | "professional";
   time: string;
   availability?: "available" | "limited" | "sold";
-  hasVideo?: boolean;
 }
 
 const VERIFIED_CONFIG = {
@@ -54,7 +52,6 @@ export default function ListingCard({
   verifiedLevel = "phone",
   time,
   availability = "available",
-  hasVideo = false,
 }: ListingCardProps) {
   return (
     <Link
@@ -67,13 +64,6 @@ export default function ListingCard({
           alt={title}
           className="w-full h-full group-hover:scale-105 transition-transform duration-300"
         />
-        {hasVideo && (
-          <div className="absolute inset-0 flex items-center justify-center bg-charbon-500/20 group-hover:bg-charbon-500/30 transition-colors">
-            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-              <Play className="w-5 h-5 text-baobab-500 ml-0.5" fill="currentColor" />
-            </div>
-          </div>
-        )}
         <div className="absolute top-2 left-2">
           <span className="badge bg-white/90 text-charbon-500 text-xs backdrop-blur-sm">
             {category}

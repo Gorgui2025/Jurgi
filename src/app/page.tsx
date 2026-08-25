@@ -47,6 +47,11 @@ function parsePhotos(photos?: string | null): string[] {
   try { return JSON.parse(photos); } catch { return []; }
 }
 
+function videoThumbnail(videoUrl: string): string {
+  if (!videoUrl.includes("cloudinary.com")) return "";
+  return videoUrl.replace("/video/upload/", "/video/upload/w_480,h_360,c_fill,so_0/").replace(/\.mp4$/, ".jpg");
+}
+
 async function getStats() {
   const [users, listings, requests] = await Promise.all([
     prisma.user.count(),
@@ -79,11 +84,11 @@ async function getRecentListings() {
       category: l.category?.name || "",
       price: l.priceOnDemand || !l.price ? "Prix à la demande" : l.price.toLocaleString("fr-FR") + " FCFA",
       location: l.commune ? `${l.commune}, ${l.region || ""}` : l.region || "",
-      image: photos[0] || videos[0] || "",
+      image: photos[0] || videoThumbnail(videos[0] || ""),
       seller: l.user?.name || "Anonyme",
       verified: l.user?.isVerified || false,
       time: timeAgo(l.createdAt.toISOString()),
-      hasVideo: videos.length > 0,
+      hasVideo: videos.length > 0 && photos.length === 0,
     };
   });
 }
