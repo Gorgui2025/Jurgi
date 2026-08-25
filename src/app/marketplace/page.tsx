@@ -187,7 +187,7 @@ function MarketplaceContent() {
 
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-charbon-300">
-          {loading ? "Chargement..." : `${listings.length} annonce${listings.length > 1 ? "s" : ""}`}
+          {loading ? "Chargement..." : `${listings.length} annonce${listings.length !== 1 ? "s" : ""}`}
         </p>
       </div>
 
@@ -195,6 +195,11 @@ function MarketplaceContent() {
         <div className="text-center py-16">
           <div className="w-8 h-8 border-2 border-baobab-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-charbon-300 text-sm">Chargement des annonces...</p>
+        </div>
+      ) : listings.length === 0 ? (
+        <div className="text-center py-16">
+          <p className="text-charbon-400 mb-1">Aucune annonce trouvée</p>
+          <p className="text-charbon-200 text-sm">Essayez de modifier vos filtres ou votre recherche.</p>
         </div>
       ) : (
         <div className={viewMode === "grid" ? "flex flex-col gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-3" : "flex flex-col gap-3"}>
@@ -247,13 +252,6 @@ function MarketplaceContent() {
       {loadingMore && (
         <div className="text-center py-6">
           <div className="w-6 h-6 border-2 border-baobab-500 border-t-transparent rounded-full animate-spin mx-auto" />
-        </div>
-      )}
-
-      {!loading && listings.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-charbon-300 text-lg mb-2">Aucune annonce trouvée</p>
-          <p className="text-charbon-200 text-sm">Essayez de modifier vos filtres ou votre recherche.</p>
         </div>
       )}
 
