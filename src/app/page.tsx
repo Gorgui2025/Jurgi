@@ -70,17 +70,22 @@ async function getRecentListings() {
     take: 6,
   });
 
-  return listings.map((l) => ({
-    id: l.id,
-    title: l.title,
-    category: l.category?.name || "",
-    price: l.priceOnDemand || !l.price ? "Prix à la demande" : l.price.toLocaleString("fr-FR") + " FCFA",
-    location: l.commune ? `${l.commune}, ${l.region || ""}` : l.region || "",
-    image: parsePhotos(l.photos)[0] || "",
-    seller: l.user?.name || "Anonyme",
-    verified: l.user?.isVerified || false,
-    time: timeAgo(l.createdAt.toISOString()),
-  }));
+  return listings.map((l) => {
+    const photos = parsePhotos(l.photos);
+    const videos = parsePhotos(l.videos);
+    return {
+      id: l.id,
+      title: l.title,
+      category: l.category?.name || "",
+      price: l.priceOnDemand || !l.price ? "Prix à la demande" : l.price.toLocaleString("fr-FR") + " FCFA",
+      location: l.commune ? `${l.commune}, ${l.region || ""}` : l.region || "",
+      image: photos[0] || videos[0] || "",
+      seller: l.user?.name || "Anonyme",
+      verified: l.user?.isVerified || false,
+      time: timeAgo(l.createdAt.toISOString()),
+      hasVideo: videos.length > 0,
+    };
+  });
 }
 
 async function getRecentRequests() {
