@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Send, Phone, Users } from "lucide-react";
+import { ArrowLeft, Send, Phone, Users, MessageSquare } from "lucide-react";
 
 interface Participant {
   id: string;
@@ -42,10 +42,6 @@ export default function ChatPage() {
 
   const myId = session?.user?.id;
   const convId = params.id as string;
-
-  useEffect(() => {
-    if (status === "unauthenticated") router.push("/connexion");
-  }, [status, router]);
 
   const fetchConversation = async () => {
     if (!myId || !convId) return;
@@ -113,6 +109,21 @@ export default function ChatPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-baobab-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="text-center">
+          <MessageSquare className="w-14 h-14 text-charbon-200 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-charbon-500 mb-2">Connexion requise</h2>
+          <p className="text-sm text-charbon-300 mb-6">Connectez-vous pour envoyer des messages.</p>
+          <Link href="/connexion" className="btn-primary inline-flex items-center gap-2">
+            Se connecter
+          </Link>
+        </div>
       </div>
     );
   }

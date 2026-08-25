@@ -1,8 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MessageSquare, ArrowLeft, Search, Users, Plus } from "lucide-react";
 
@@ -29,14 +28,9 @@ interface Conversation {
 
 export default function MessagesPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    if (status === "unauthenticated") router.push("/connexion");
-  }, [status, router]);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -47,13 +41,28 @@ export default function MessagesPage() {
           setLoading(false);
         })
         .catch(() => setLoading(false));
+    } else if (status !== "loading") {
+      setLoading(false);
     }
-  }, [session]);
+  }, [session, status]);
 
   if (status === "loading" || loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-baobab-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="page-container max-w-2xl mx-auto py-16 px-4 text-center">
+        <MessageSquare className="w-14 h-14 text-charbon-200 mx-auto mb-4" />
+        <h2 className="text-xl font-bold text-charbon-500 mb-2">Connexion requise</h2>
+        <p className="text-sm text-charbon-300 mb-6">Connectez-vous pour accéder à votre messagerie et contacter des vendeurs.</p>
+        <Link href="/connexion" className="btn-primary inline-flex items-center gap-2">
+          Se connecter
+        </Link>
       </div>
     );
   }

@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Users, User, Search, Check, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Users, User, Search, Check, X, MessageSquare } from "lucide-react";
 
 interface UserItem {
   id: string;
@@ -23,10 +23,6 @@ export default function NouvelleConversationPage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [groupName, setGroupName] = useState("");
   const [creating, setCreating] = useState(false);
-
-  useEffect(() => {
-    if (status === "unauthenticated") router.push("/connexion");
-  }, [status, router]);
 
   useEffect(() => {
     fetch("/api/users")
@@ -81,6 +77,19 @@ export default function NouvelleConversationPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-baobab-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="page-container max-w-2xl mx-auto py-16 px-4 text-center">
+        <MessageSquare className="w-14 h-14 text-charbon-200 mx-auto mb-4" />
+        <h2 className="text-xl font-bold text-charbon-500 mb-2">Connexion requise</h2>
+        <p className="text-sm text-charbon-300 mb-6">Connectez-vous pour démarrer une conversation.</p>
+        <Link href="/connexion" className="btn-primary inline-flex items-center gap-2">
+          Se connecter
+        </Link>
       </div>
     );
   }
