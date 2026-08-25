@@ -1,4 +1,5 @@
 import Link from "next/link";
+export const dynamic = "force-dynamic";
 import {
   Search, MapPin, TrendingUp, Shield, MessageCircle,
   ChevronRight, Phone, ArrowRight, BadgeCheck, Clock,
