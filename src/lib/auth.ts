@@ -58,7 +58,28 @@ export const authOptions: NextAuthOptions = {
 
         // Email + password login
         if (credentials.email && credentials.password) {
-          // Check User table first
+          // Check Admin table first (admins take priority)
+          const admin = await prisma.admin.findUnique({
+            where: { email: credentials.email },
+          });
+          if (admin && admin.isActive) {
+            const valid = await bcrypt.compare(credentials.password, admin.passwordHash);
+            if (valid) {
+              await prisma.admin.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } });
+              return {
+                id: admin.id,
+                name: admin.name,
+                email: admin.email,
+                phone: null,
+                roles: ["admin", admin.role],
+                region: null,
+                accountStatus: "active",
+                avatar: null,
+              };
+            }
+          }
+
+          // Check User table
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
           });
@@ -77,27 +98,6 @@ export const authOptions: NextAuthOptions = {
                 region: user.region,
                 accountStatus: user.accountStatus,
                 avatar: user.avatar,
-              };
-            }
-          }
-
-          // Check Admin table
-          const admin = await prisma.admin.findUnique({
-            where: { email: credentials.email },
-          });
-          if (admin && admin.isActive) {
-            const valid = await bcrypt.compare(credentials.password, admin.passwordHash);
-            if (valid) {
-              await prisma.admin.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } });
-              return {
-                id: admin.id,
-                name: admin.name,
-                email: admin.email,
-                phone: null,
-                roles: ["admin", admin.role],
-                region: null,
-                accountStatus: "active",
-                avatar: null,
               };
             }
           }
