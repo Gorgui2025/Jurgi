@@ -23,7 +23,7 @@ export default function HomeHero({ stats }: { stats?: { users: number; listings:
           aria-hidden="true"
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(90deg, rgba(23,63,47,0.86) 0%, rgba(23,63,47,0.62) 38%, rgba(23,63,47,0.12) 76%, rgba(23,63,47,0) 100%)",
+            background: "linear-gradient(90deg, rgba(23,63,47,0.94) 0%, rgba(23,63,47,0.82) 30%, rgba(23,63,47,0.45) 60%, rgba(23,63,47,0.10) 85%, rgba(23,63,47,0) 100%)",
           }}
         />
       </div>
