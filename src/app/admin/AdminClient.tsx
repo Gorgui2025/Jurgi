@@ -7,7 +7,7 @@ import {
   Ban, AlertTriangle, Clock, Globe, Mail, Phone, ShieldCheck, Key, LogOut,
   Inbox, MessageSquare, FileSearch, Activity, Search, Building2, Wallet, Bot,
   ArrowUpRight, Calendar, MessageCircle, Loader2, RefreshCw, Power,
-  Zap, AlertOctagon, CheckSquare, Eye, Crown, CreditCard,
+  Zap, AlertOctagon, CheckSquare, Eye, Crown, CreditCard, Bell,
 } from "lucide-react";
 import { AdminUser } from "@/lib/admin-auth";
 import { logAdminAction } from "@/lib/admin-audit";
@@ -1350,6 +1350,23 @@ function PlaceholderTab({ title, desc }: { title: string; desc: string }) {
 export default function AdminPage({ admin: serverAdmin }: { admin: { id: string; email: string; name: string; role: string } }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [newUsers, setNewUsers] = useState<{ id: string; name: string; phone: string | null; email: string | null; region: string | null; createdAt: string }[]>([]);
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
+
+  useEffect(() => {
+    const fetchNewUsers = () => {
+      fetch("/api/admin/activity").then(r => r.json()).then(d => {
+        const users = (d.activities || []).filter((a: any) => a.type === "user");
+        setNewUsers(users.map((u: any) => {
+          const parts = (u.detail || "").split(" — ");
+          return { id: u.id, name: parts[0] || u.detail, phone: null, email: null, region: parts[2] || "", createdAt: u.time };
+        }));
+      }).catch(() => {});
+    };
+    fetchNewUsers();
+    const interval = setInterval(fetchNewUsers, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const ROLE_PERMISSIONS: Record<string, string[]> = {
     super_admin: [
@@ -1406,9 +1423,45 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
             <span className="ml-2">{admin.name}</span>
           </p>
         </div>
-        <button onClick={logout} className="flex items-center gap-2 text-sm text-charbon-400 hover:text-rougeterre-500 transition-colors">
-          <LogOut className="w-4 h-4" /> Déconnexion
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <button onClick={() => setShowNotifPanel(!showNotifPanel)} className="flex items-center gap-2 text-sm text-charbon-400 hover:text-baobab-500 transition-colors relative">
+              <Bell className="w-5 h-5" />
+              {newUsers.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-rougeterre-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                  {newUsers.length}
+                </span>
+              )}
+            </button>
+            {showNotifPanel && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowNotifPanel(false)} />
+                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl border border-beigebrume-200 shadow-lg z-50 py-1 max-h-96 overflow-y-auto">
+                  <div className="px-4 py-3 border-b border-beigebrume-100 flex items-center justify-between">
+                    <p className="text-sm font-semibold text-charbon-500">Nouvelles inscriptions</p>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-baobab-100 text-baobab-600 font-medium">{newUsers.length}</span>
+                  </div>
+                  {newUsers.length === 0 ? (
+                    <div className="px-4 py-6 text-center">
+                      <p className="text-sm text-charbon-300">Aucune nouvelle inscription</p>
+                    </div>
+                  ) : (
+                    newUsers.slice(0, 10).map((u) => (
+                      <div key={u.id} className="px-4 py-3 hover:bg-vertbrume-50 border-b border-beigebrume-50 last:border-0">
+                        <p className="text-sm font-medium text-charbon-500">{u.name}</p>
+                        <p className="text-xs text-charbon-300">{u.region || "Région inconnue"}</p>
+                        <p className="text-[10px] text-charbon-200 mt-0.5">{u.createdAt}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+          <button onClick={logout} className="flex items-center gap-2 text-sm text-charbon-400 hover:text-rougeterre-500 transition-colors">
+            <LogOut className="w-4 h-4" /> Déconnexion
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
