@@ -41,8 +41,9 @@ export default function ConnexionPage() {
         }
       } else {
         const session = await getSession();
-        const emailAddr = session?.user?.email;
-        window.location.href = emailAddr === "admin@jurgi.sn" ? "/admin" : "/";
+        const roles = session?.user?.roles || [];
+        const isAdmin = roles.some(r => r === "admin" || r.startsWith("admin_"));
+        window.location.href = isAdmin ? "/admin" : "/";
       }
     } catch {
       setError("Erreur réseau");
