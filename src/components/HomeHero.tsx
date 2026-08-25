@@ -23,7 +23,7 @@ export default function HomeHero({ stats }: { stats?: { users: number; listings:
           aria-hidden="true"
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(90deg, rgba(23,63,47,0.94) 0%, rgba(23,63,47,0.82) 30%, rgba(23,63,47,0.45) 60%, rgba(23,63,47,0.10) 85%, rgba(23,63,47,0) 100%)",
+            background: "linear-gradient(90deg, rgba(23,63,47,0.94) 0%, rgba(23,63,47,0.82) 30%, rgba(23,63,47,0.55) 60%, rgba(23,63,47,0.25) 80%, rgba(23,63,47,0.08) 100%)",
           }}
         />
       </div>
@@ -33,7 +33,7 @@ export default function HomeHero({ stats }: { stats?: { users: number; listings:
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-5 text-balance">
             Tout l&apos;écosystème de l&apos;élevage, au même endroit
           </h1>
-          <p className="text-base sm:text-lg text-baobab-100 mb-8 leading-relaxed">
+          <p className="text-base sm:text-lg text-white/90 mb-8 leading-relaxed">
             Animaux, aliments, équipements, vétérinaires, transporteurs et
             partenaires : trouvez ce dont vous avez besoin pour votre élevage.
           </p>
@@ -88,7 +88,7 @@ export default function HomeHero({ stats }: { stats?: { users: number; listings:
                 Rechercher
               </button>
             </form>
-            <p className="text-xs text-baobab-200 mt-2.5 ml-1">
+            <p className="text-xs text-white/70 mt-2.5 ml-1">
               Animaux · Aliments · Équipements · Services vétérinaires · Transport · Formation · Débouchés
             </p>
           </div>
