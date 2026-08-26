@@ -200,7 +200,7 @@ function QueueTab({ admin }: { admin: AdminUser }) {
 }
 
 /* ────── USERS ────── */
-function UsersTab({ admin }: { admin: AdminUser }) {
+function UsersTab({ admin, onAction }: { admin: AdminUser; onAction?: () => void }) {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -209,6 +209,10 @@ function UsersTab({ admin }: { admin: AdminUser }) {
 
   useEffect(() => {
     fetch("/api/users").then(r => r.json()).then(d => { setUsers(Array.isArray(d) ? d : d.users || []); setLoading(false); }).catch(() => setLoading(false));
+    const interval = setInterval(() => {
+      fetch("/api/users").then(r => r.json()).then(d => { setUsers(Array.isArray(d) ? d : d.users || []); }).catch(() => {});
+    }, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const filtered = users
@@ -221,6 +225,7 @@ function UsersTab({ admin }: { admin: AdminUser }) {
     await fetch("/api/users", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: userId, accountStatus: status }) });
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, accountStatus: status } : u));
     if (hasPerm(admin, "audit")) logAdminAction(admin.id, admin.email, admin.role, `user_${status}`, "user", userId, undefined, status, reason);
+    if (onAction) onAction();
   };
 
   const handleResetPassword = async (userId: string) => {
@@ -1357,28 +1362,29 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [adminNotifications, setAdminNotifications] = useState<{ id: string; type: string; title: string; message: string; createdAt: string; read: boolean }[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const adminId = serverAdmin.id;
 
-  const fetchNotifications = () => {
-    fetch(`/api/admin/admin-notifications?adminId=${admin.id}`)
+  const fetchNotifications = useCallback(() => {
+    fetch(`/api/admin/admin-notifications?adminId=${adminId}`)
       .then(r => r.json())
       .then(d => {
         setAdminNotifications(d.notifications || []);
         setUnreadCount(d.unreadCount || 0);
       })
       .catch(() => {});
-  };
+  }, [adminId]);
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
+    const interval = setInterval(fetchNotifications, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchNotifications]);
 
   const markAsSeen = () => {
     fetch("/api/admin/admin-notifications", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adminId: admin.id }),
+      body: JSON.stringify({ adminId }),
     }).then(() => {
       setUnreadCount(0);
     }).catch(() => {});
@@ -1494,7 +1500,7 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
         <div className="flex-1">
           {activeTab === "dashboard" && <DashboardTab admin={admin} />}
           {activeTab === "queue" && <QueueTab admin={admin} />}
-          {activeTab === "users" && <UsersTab admin={admin} />}
+          {activeTab === "users" && <UsersTab admin={admin} onAction={fetchNotifications} />}
           {activeTab === "listings" && <ListingsTab admin={admin} />}
           {activeTab === "reports" && <ReportsTab admin={admin} />}
           {activeTab === "audit" && <AuditTab admin={admin} />}
@@ -1504,7 +1510,7 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
           {activeTab === "ai" && <AiTab admin={admin} />}
           {activeTab === "requests" && <PlaceholderTab title="Demandes d'achat" desc="Suivi des demandes publiées par les éleveurs" />}
           {activeTab === "professionals" && <PlaceholderTab title="Professionnels" desc="Centre de contrôle des profils professionnels" />}
-          {activeTab === "deliveryDrivers" && <DeliveryDriversTab />}
+          {activeTab === "deliveryDrivers" && <DeliveryDriversTab onAction={fetchNotifications} />}
           {activeTab === "messages" && <PlaceholderTab title="Messages signalés" desc="Conversations nécessitant une intervention" />}
           {activeTab === "finance" && <PlaceholderTab title="Centre financier" desc="Paiement automatique non activé" />}
         </div>

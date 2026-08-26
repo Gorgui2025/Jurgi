@@ -33,7 +33,7 @@ interface PlanInfo {
   trialDays: number;
 }
 
-export default function DeliveryDriversTab() {
+export default function DeliveryDriversTab({ onAction }: { onAction?: () => void }) {
   const [drivers, setDrivers] = useState<DeliveryDriver[]>([]);
   const [requests, setRequests] = useState<DeliveryRequest[]>([]);
   const [planInfo, setPlanInfo] = useState<PlanInfo>({ price: 1500, durationDays: 30, trialDays: 7 });
@@ -44,7 +44,7 @@ export default function DeliveryDriversTab() {
   const [editingPlan, setEditingPlan] = useState(false);
   const [subTab, setSubTab] = useState<"drivers" | "requests">("drivers");
 
-  useEffect(() => {
+  const fetchData = () => {
     Promise.all([
       fetch("/api/admin/delivery-drivers").then(r => r.json()),
       fetch("/api/admin/delivery-requests").then(r => r.json()),
@@ -53,6 +53,12 @@ export default function DeliveryDriversTab() {
       setRequests(r.requests || []);
       setLoading(false);
     }).catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const statusCounts = {
@@ -88,6 +94,7 @@ export default function DeliveryDriversTab() {
     });
     const data = await res.json();
     setDrivers(prev => prev.map(d => d.id === driverId ? { ...d, status: "trial", isActive: true, trialEndsAt: data.trialEndsAt } : d));
+    if (onAction) onAction();
   };
 
   const handleReject = async (driverId: string) => {
@@ -98,6 +105,7 @@ export default function DeliveryDriversTab() {
       body: JSON.stringify({ driverId, action: "reject" }),
     });
     setDrivers(prev => prev.filter(d => d.id !== driverId));
+    if (onAction) onAction();
   };
 
   const handleUpdatePlan = async () => {

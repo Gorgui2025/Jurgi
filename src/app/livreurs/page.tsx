@@ -157,6 +157,13 @@ function LivreursContent() {
     fetchDrivers(1, false).then(() => setLoading(false));
   }, [searchQuery, selectedRegion, selectedVehicle, selectedAvailability]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchDrivers(1, false);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [searchQuery, selectedRegion, selectedVehicle, selectedAvailability]);
+
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
