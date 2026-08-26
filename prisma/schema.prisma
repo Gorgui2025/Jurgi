@@ -48,6 +48,8 @@ model User {
   subscriptions Subscription[]
   payments      Payment[]
   paymentRequests PaymentRequest[]
+  deliveryProfile DeliveryProfile?
+  deliveryRequests DeliveryRequest[]
 }
 
 model Admin {
@@ -491,4 +493,86 @@ model PaymentRequest {
   @@index([userId])
   @@index([status])
   @@index([activationCode])
+}
+
+model DeliveryProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  displayName     String?
+  phone           String?
+  whatsapp        String?
+  photo           String?
+  bio             String?
+  vehicleType     String
+  vehicleCapacity String?
+  zones           String   @default("[]")
+  acceptedTypes   String   @default("[]")
+  refusedTypes    String   @default("[]")
+  availability    String   @default("available")
+  hourlySchedule  String?
+  urgentDelivery  Boolean  @default(false)
+  weekendDelivery Boolean  @default(false)
+  contactMode     String   @default("phone")
+  indicativePrice String?
+  status          String   @default("trial")
+  trialEndsAt     DateTime?
+  subscriptionEnd DateTime?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id])
+  responses       DeliveryResponse[] @relation("deliveryResponses")
+
+  @@index([userId])
+  @@index([status])
+  @@index([availability])
+}
+
+model DeliveryRequest {
+  id              String   @id @default(cuid())
+  userId          String
+  pickupLocation  String
+  deliveryLocation String
+  region          String?
+  commune         String?
+  productType     String
+  quantity        String?
+  needHandling    Boolean  @default(false)
+  scheduledDate   DateTime?
+  scheduledSlot   String?
+  urgency         String   @default("normal")
+  budget          Int?
+  photos          String   @default("[]")
+  contactMode     String   @default("phone")
+  description     String?
+  status          String   @default("published")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id])
+  responses       DeliveryResponse[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([region])
+}
+
+model DeliveryResponse {
+  id              String   @id @default(cuid())
+  requestId       String
+  deliveryProfileId String
+  message         String?
+  estimatedDelay  String?
+  indicativePrice Int?
+  vehicleType     String?
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  request         DeliveryRequest @relation(fields: [requestId], references: [id])
+  deliveryProfile DeliveryProfile @relation("deliveryResponses", fields: [deliveryProfileId], references: [id])
+
+  @@index([requestId])
+  @@index([deliveryProfileId])
 }

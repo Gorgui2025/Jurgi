@@ -13,6 +13,7 @@ const ROLES = [
   { value: "fournisseur", label: "Fournisseur", icon: "🌾", desc: "Aliments & produits", pro: false },
   { value: "veterinaire", label: "Vétérinaire / Technicien", icon: "🩺", desc: "Je soigne les animaux", pro: true },
   { value: "transporteur", label: "Transporteur", icon: "🚛", desc: "Transport bétail/produits", pro: true },
+  { value: "livreur", label: "Livreur", icon: "🛵", desc: "Livraison de proximité", pro: true },
   { value: "acheteur", label: "Acheteur pro", icon: "🛒", desc: "J'achète en volume", pro: false },
   { value: "formateur", label: "Formateur", icon: "📚", desc: "Je forme les éleveurs", pro: false },
   { value: "institution", label: "Institution / Coopérative", icon: "🏛️", desc: "Organisation", pro: true },
@@ -24,7 +25,7 @@ const REGIONS = [
   "Sédhiou", "Tambacounda", "Thiès", "Ziguinchor",
 ];
 
-const PRO_ROLES = ["veterinaire", "transporteur", "institution"];
+const PRO_ROLES = ["veterinaire", "transporteur", "institution", "livreur"];
 
 export default function InscriptionPage() {
   const [step, setStep] = useState(0);
