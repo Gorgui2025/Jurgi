@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import DeliveryDriversTab from "./DeliveryDriversTab";
 import {
   Users, FileText, Flag, BarChart3, Settings, Shield, CheckCircle, XCircle,
   Ban, AlertTriangle, Clock, Globe, Mail, Phone, ShieldCheck, Key, LogOut,
   Inbox, MessageSquare, FileSearch, Activity, Search, Building2, Wallet, Bot,
   ArrowUpRight, Calendar, MessageCircle, Loader2, RefreshCw, Power,
-  Zap, AlertOctagon, CheckSquare, Eye, Crown, CreditCard, Bell,
+  Zap, AlertOctagon, CheckSquare, Eye, Crown, CreditCard, Bell, Truck,
 } from "lucide-react";
 import { AdminUser } from "@/lib/admin-auth";
 import { logAdminAction } from "@/lib/admin-audit";
@@ -29,6 +30,7 @@ const ALL_TABS = [
   { id: "reports", label: "Signalements", icon: "Flag", perm: "reports" },
   { id: "requests", label: "Demandes", icon: "Inbox", perm: "requests" },
   { id: "professionals", label: "Professionnels", icon: "Building2", perm: "professionals" },
+  { id: "deliveryDrivers", label: "Livreurs", icon: "Truck", perm: "professionals" },
   { id: "messages", label: "Messages", icon: "MessageSquare", perm: "messages" },
   { id: "audit", label: "Journal", icon: "FileSearch", perm: "audit" },
   { id: "settings", label: "Paramètres", icon: "Settings", perm: "settings" },
@@ -52,6 +54,8 @@ const TAB_ICONS: Record<string, React.ReactNode> = {
   Bot: <Bot className="w-4 h-4" />,
   Crown: <Crown className="w-4 h-4" />,
   CreditCard: <CreditCard className="w-4 h-4" />,
+  Bell: <Bell className="w-4 h-4" />,
+  Truck: <Truck className="w-4 h-4" />,
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -1500,6 +1504,7 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
           {activeTab === "ai" && <AiTab admin={admin} />}
           {activeTab === "requests" && <PlaceholderTab title="Demandes d'achat" desc="Suivi des demandes publiées par les éleveurs" />}
           {activeTab === "professionals" && <PlaceholderTab title="Professionnels" desc="Centre de contrôle des profils professionnels" />}
+          {activeTab === "deliveryDrivers" && <DeliveryDriversTab />}
           {activeTab === "messages" && <PlaceholderTab title="Messages signalés" desc="Conversations nécessitant une intervention" />}
           {activeTab === "finance" && <PlaceholderTab title="Centre financier" desc="Paiement automatique non activé" />}
         </div>
