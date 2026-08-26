@@ -159,6 +159,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    if (pr.plan.slug === "livreur") {
+      const deliveryProfile = await prisma.deliveryProfile.findUnique({ where: { userId: pr.userId } });
+      if (deliveryProfile) {
+        const subscriptionEnd = new Date(Date.now() + pr.plan.durationDays * 86400000);
+        await prisma.deliveryProfile.update({
+          where: { id: deliveryProfile.id },
+          data: { status: "active", subscriptionEnd, isActive: true },
+        });
+      }
+    }
+
     return NextResponse.json({
       status: "validated",
       id: updated.id,

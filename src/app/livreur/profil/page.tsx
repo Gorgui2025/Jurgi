@@ -14,6 +14,8 @@ import {
   AlertTriangle,
   Shield,
   Edit2,
+  CreditCard,
+  ArrowRight,
 } from "lucide-react";
 
 interface DeliveryProfile {
@@ -304,6 +306,9 @@ export default function LivreurProfilPage() {
               ? "Actif"
               : "Expiré"}
           </span>
+          <a href="/livreur/payer" className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-baobab-500 hover:text-baobab-600">
+            <CreditCard className="w-4 h-4" /> Payer l&apos;abonnement <ArrowRight className="w-3 h-3" />
+          </a>
         </div>
       )}
 
