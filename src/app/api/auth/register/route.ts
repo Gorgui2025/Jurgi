@@ -56,6 +56,20 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.create({ data });
 
+    if (roles.includes("livreur")) {
+      await prisma.deliveryProfile.create({
+        data: {
+          userId: user.id,
+          displayName: name,
+          phone: phone || null,
+          vehicleType: "Moto",
+          zones: JSON.stringify(region ? [{ region, commune: commune || "" }] : []),
+          status: "pending",
+          isActive: false,
+        },
+      });
+    }
+
     if (needsValidation) {
       const roleLabels: Record<string, string> = {
         veterinaire: "Vétérinaire",
