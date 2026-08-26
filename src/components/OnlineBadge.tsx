@@ -11,10 +11,14 @@ export default function OnlineBadge({ lastSeen, className = "" }: { lastSeen: st
 
   return (
     <span
-      className={`inline-block w-2.5 h-2.5 rounded-full border-2 border-white shrink-0 ${
-        online ? "bg-vertprofond-500" : "bg-charbon-200"
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium shrink-0 ${
+        online
+          ? "bg-vertprofond-100 text-vertprofond-600"
+          : "bg-charbon-100 text-charbon-400"
       } ${className}`}
-      title={online ? "En ligne" : "Hors ligne"}
-    />
+    >
+      <span className={`w-2 h-2 rounded-full ${online ? "bg-vertprofond-500" : "bg-charbon-300"}`} />
+      {online ? "Disponible" : "Indisponible"}
+    </span>
   );
 }
