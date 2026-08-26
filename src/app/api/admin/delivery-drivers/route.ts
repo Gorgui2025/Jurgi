@@ -45,6 +45,52 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    if (action === "approve" && driverId) {
+      const trialEndsAt = new Date();
+      trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
+      await prisma.deliveryProfile.update({
+        where: { id: driverId },
+        data: { status: "trial", trialEndsAt, isActive: true },
+      });
+
+      const profile = await prisma.deliveryProfile.findUnique({ where: { id: driverId }, select: { userId: true } });
+      if (profile) {
+        await prisma.user.update({ where: { id: profile.userId }, data: { accountStatus: "active" } });
+        await prisma.notification.create({
+          data: {
+            userId: profile.userId,
+            type: "delivery_approved",
+            title: "Profil livreur approuvé",
+            message: "Votre profil livreur a été approuvé. Vous bénéficiez de 7 jours d'essai gratuit.",
+            data: JSON.stringify({ trialEndsAt: trialEndsAt.toISOString() }),
+          },
+        });
+      }
+
+      return NextResponse.json({ success: true, trialEndsAt });
+    }
+
+    if (action === "reject" && driverId) {
+      const profile = await prisma.deliveryProfile.findUnique({ where: { id: driverId }, select: { userId: true } });
+      await prisma.deliveryProfile.delete({ where: { id: driverId } });
+
+      if (profile) {
+        await prisma.user.update({ where: { id: profile.userId }, data: { accountStatus: "rejected" } });
+        await prisma.notification.create({
+          data: {
+            userId: profile.userId,
+            type: "delivery_rejected",
+            title: "Profil livreur refusé",
+            message: "Votre profil livreur a été refusé. Contactez le support pour plus d'informations.",
+            data: JSON.stringify({}),
+          },
+        });
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
     if (action === "suspend" && driverId) {
       await prisma.deliveryProfile.update({
         where: { id: driverId },

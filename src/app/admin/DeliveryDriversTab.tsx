@@ -56,6 +56,7 @@ export default function DeliveryDriversTab() {
   }, []);
 
   const statusCounts = {
+    pending: drivers.filter(d => d.status === "pending").length,
     trial: drivers.filter(d => d.status === "trial").length,
     active: drivers.filter(d => d.status === "active").length,
     expired: drivers.filter(d => d.status === "expired").length,
@@ -77,6 +78,26 @@ export default function DeliveryDriversTab() {
       body: JSON.stringify({ driverId, action: suspend ? "suspend" : "reactivate" }),
     });
     setDrivers(prev => prev.map(d => d.id === driverId ? { ...d, status: suspend ? "suspended" : "active", isActive: !suspend } : d));
+  };
+
+  const handleApprove = async (driverId: string) => {
+    const res = await fetch("/api/admin/delivery-drivers", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ driverId, action: "approve" }),
+    });
+    const data = await res.json();
+    setDrivers(prev => prev.map(d => d.id === driverId ? { ...d, status: "trial", isActive: true, trialEndsAt: data.trialEndsAt } : d));
+  };
+
+  const handleReject = async (driverId: string) => {
+    if (!confirm("Refuser ce profil livreur ? Le compte sera also rejeté.")) return;
+    await fetch("/api/admin/delivery-drivers", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ driverId, action: "reject" }),
+    });
+    setDrivers(prev => prev.filter(d => d.id !== driverId));
   };
 
   const handleUpdatePlan = async () => {
@@ -110,8 +131,9 @@ export default function DeliveryDriversTab() {
         </p>
       </div>
 
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-6 gap-3">
         {[
+          { label: "En attente", count: statusCounts.pending, color: "bg-ocre-50 text-ocre-600 border-ocre-200" },
           { label: "Essai", count: statusCounts.trial, color: "bg-ocre-50 text-ocre-600 border-ocre-200" },
           { label: "Actifs", count: statusCounts.active, color: "bg-vertbrume-50 text-vertprofond-600 border-vertprofond-200" },
           { label: "Expirés", count: statusCounts.expired, color: "bg-rougeterre-50 text-rougeterre-600 border-rougeterre-200" },
@@ -173,6 +195,7 @@ export default function DeliveryDriversTab() {
             </div>
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="input-field w-auto">
               <option value="all">Tous les statuts</option>
+              <option value="pending">En attente</option>
               <option value="trial">Essai</option>
               <option value="active">Actif</option>
               <option value="expired">Expiré</option>
@@ -215,6 +238,7 @@ export default function DeliveryDriversTab() {
                     <td className="p-3 text-charbon-400 text-xs">{Array.isArray(driver.zones) ? driver.zones.join(", ") : "—"}</td>
                     <td className="p-3">
                       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        driver.status === "pending" ? "bg-ocre-100 text-ocre-600" :
                         driver.status === "active" ? "bg-vertbrume-100 text-vertprofond-600" :
                         driver.status === "trial" ? "bg-ocre-100 text-ocre-600" :
                         driver.status === "suspended" ? "bg-rougeterre-100 text-rougeterre-600" :
@@ -224,12 +248,23 @@ export default function DeliveryDriversTab() {
                          driver.status === "trial" ? <Clock className="w-3 h-3" /> :
                          driver.status === "suspended" ? <XCircle className="w-3 h-3" /> :
                          <AlertTriangle className="w-3 h-3" />}
-                        {driver.status}
+                        {driver.status === "pending" ? "En attente" : driver.status}
                       </span>
                     </td>
                     <td className="p-3">
                       <div className="flex items-center gap-1">
-                        {driver.status === "suspended" ? (
+                        {driver.status === "pending" ? (
+                          <>
+                            <button onClick={() => handleApprove(driver.id)}
+                              className="text-xs text-vertprofond-500 hover:text-vertprofond-600 p-1 rounded-lg hover:bg-vertbrume-50" title="Approuver">
+                              <CheckCircle className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleReject(driver.id)}
+                              className="text-xs text-rougeterre-500 hover:text-rougeterre-600 p-1 rounded-lg hover:bg-rougeterre-50" title="Refuser">
+                              <XCircle className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        ) : driver.status === "suspended" ? (
                           <button onClick={() => handleSuspend(driver.id, false)}
                             className="text-xs text-vertprofond-500 hover:text-vertprofond-600 p-1 rounded-lg hover:bg-vertbrume-50">
                             <RotateCcw className="w-3.5 h-3.5" />

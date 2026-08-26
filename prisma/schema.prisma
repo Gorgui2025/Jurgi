@@ -514,7 +514,7 @@ model DeliveryProfile {
   weekendDelivery Boolean  @default(false)
   contactMode     String   @default("phone")
   indicativePrice String?
-  status          String   @default("trial")
+  status          String   @default("pending")
   trialEndsAt     DateTime?
   subscriptionEnd DateTime?
   isActive        Boolean  @default(true)

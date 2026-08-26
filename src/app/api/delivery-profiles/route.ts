@@ -105,8 +105,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Profil livreur déjà créé" }, { status: 409 });
     }
 
-    const trialEndsAt = new Date();
-    trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
+    }
+
+    const isAdminValidated = user.accountStatus === "active";
+    const profileStatus = isAdminValidated ? "trial" : "pending";
+    const trialEndsAt = isAdminValidated ? (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d; })() : null;
 
     const profile = await prisma.deliveryProfile.create({
       data: {
@@ -127,8 +133,9 @@ export async function POST(request: NextRequest) {
         weekendDelivery: weekendDelivery || false,
         contactMode: contactMode || "phone",
         indicativePrice: indicativePrice || null,
-        status: "trial",
+        status: profileStatus,
         trialEndsAt,
+        isActive: isAdminValidated,
       },
       include: {
         user: { select: { id: true, name: true, avatar: true, isVerified: true } },

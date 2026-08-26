@@ -293,14 +293,18 @@ export default function LivreurProfilPage() {
           </p>
           <span
             className={`inline-block mt-1 text-xs font-semibold px-2 py-1 rounded ${
-              trialInfo.status === "essai"
+              trialInfo.status === "pending"
+                ? "bg-ocre-100 text-ocre-800"
+                : trialInfo.status === "essai"
                 ? "bg-yellow-100 text-yellow-800"
                 : trialInfo.status === "actif"
                 ? "bg-green-100 text-green-800"
                 : "bg-red-100 text-red-800"
             }`}
           >
-            {trialInfo.status === "essai"
+            {trialInfo.status === "pending"
+              ? "En attente de validation"
+              : trialInfo.status === "essai"
               ? "Essai"
               : trialInfo.status === "actif"
               ? "Actif"

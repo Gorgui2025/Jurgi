@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const PRO_ROLES = ["veterinaire", "transporteur", "institution"];
+    const PRO_ROLES = ["veterinaire", "transporteur", "institution", "livreur"];
     const needsValidation = roles.some((r: string) => PRO_ROLES.includes(r));
 
     const data: Record<string, unknown> = {
