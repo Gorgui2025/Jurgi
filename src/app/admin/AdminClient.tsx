@@ -1352,6 +1352,18 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
   const [activeTab, setActiveTab] = useState("dashboard");
   const [newUsers, setNewUsers] = useState<{ id: string; name: string; phone: string | null; email: string | null; region: string | null; createdAt: string }[]>([]);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const [lastSeenAt, setLastSeenAt] = useState<string>(() => {
+    if (typeof window !== "undefined") return localStorage.getItem("admin_notif_seen") || "";
+    return "";
+  });
+
+  const unreadCount = newUsers.filter(u => !lastSeenAt || u.createdAt > lastSeenAt).length;
+
+  const markAsSeen = () => {
+    const now = new Date().toISOString();
+    localStorage.setItem("admin_notif_seen", now);
+    setLastSeenAt(now);
+  };
 
   useEffect(() => {
     const fetchNewUsers = () => {
@@ -1425,11 +1437,11 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <button onClick={() => setShowNotifPanel(!showNotifPanel)} className="flex items-center gap-2 text-sm text-charbon-400 hover:text-baobab-500 transition-colors relative">
+            <button onClick={() => { setShowNotifPanel(!showNotifPanel); if (!showNotifPanel) markAsSeen(); }} className="flex items-center gap-2 text-sm text-charbon-400 hover:text-baobab-500 transition-colors relative">
               <Bell className="w-5 h-5" />
-              {newUsers.length > 0 && (
+              {unreadCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-rougeterre-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
-                  {newUsers.length}
+                  {unreadCount}
                 </span>
               )}
             </button>
