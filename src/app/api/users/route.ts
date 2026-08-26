@@ -149,6 +149,24 @@ export async function PATCH(request: NextRequest) {
       data,
     });
 
+    if (accountStatus === "active" || accountStatus === "rejected") {
+      const statusLabel = accountStatus === "active" ? "validé" : "refusé";
+      const statusType = accountStatus === "active" ? "account_validated" : "account_rejected";
+      const statusMsg = accountStatus === "active"
+        ? "Votre compte a été validé par l'administrateur. Vous pouvez désormais accéder à toutes les fonctionnalités."
+        : "Votre compte a été refusé. Contactez le support pour plus d'informations.";
+
+      await prisma.notification.create({
+        data: {
+          userId: id,
+          type: statusType,
+          title: `Compte ${statusLabel}`,
+          message: statusMsg,
+          data: JSON.stringify({ accountStatus }),
+        },
+      });
+    }
+
     return NextResponse.json({ id: updated.id, accountStatus: updated.accountStatus });
   } catch (error) {
     return NextResponse.json({ error: "Erreur lors de la mise à jour" }, { status: 500 });

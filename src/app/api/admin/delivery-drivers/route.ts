@@ -96,6 +96,18 @@ export async function PATCH(request: NextRequest) {
         where: { id: driverId },
         data: { status: "suspended", isActive: false },
       });
+      const profile = await prisma.deliveryProfile.findUnique({ where: { id: driverId }, select: { userId: true } });
+      if (profile) {
+        await prisma.notification.create({
+          data: {
+            userId: profile.userId,
+            type: "delivery_suspended",
+            title: "Profil livreur suspendu",
+            message: "Votre profil livreur a été suspendu par un administrateur. Contactez le support pour plus d'informations.",
+            data: JSON.stringify({ driverId }),
+          },
+        });
+      }
       return NextResponse.json({ success: true });
     }
 
@@ -104,6 +116,18 @@ export async function PATCH(request: NextRequest) {
         where: { id: driverId },
         data: { status: "active", isActive: true },
       });
+      const profile = await prisma.deliveryProfile.findUnique({ where: { id: driverId }, select: { userId: true } });
+      if (profile) {
+        await prisma.notification.create({
+          data: {
+            userId: profile.userId,
+            type: "delivery_reactivated",
+            title: "Profil livreur réactivé",
+            message: "Votre profil livreur a été réactivé par un administrateur.",
+            data: JSON.stringify({ driverId }),
+          },
+        });
+      }
       return NextResponse.json({ success: true });
     }
 

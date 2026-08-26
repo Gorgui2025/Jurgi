@@ -1354,35 +1354,35 @@ function PlaceholderTab({ title, desc }: { title: string; desc: string }) {
 export default function AdminPage({ admin: serverAdmin }: { admin: { id: string; email: string; name: string; role: string } }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [newUsers, setNewUsers] = useState<{ id: string; name: string; phone: string | null; email: string | null; region: string | null; createdAt: string }[]>([]);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
-  const [lastSeenAt, setLastSeenAt] = useState<string>(() => {
-    if (typeof window !== "undefined") return localStorage.getItem("admin_notif_seen") || "";
-    return "";
-  });
+  const [adminNotifications, setAdminNotifications] = useState<{ id: string; type: string; title: string; message: string; createdAt: string; read: boolean }[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const unreadCount = newUsers.filter(u => !lastSeenAt || u.createdAt > lastSeenAt).length;
-
-  const markAsSeen = () => {
-    const now = new Date().toISOString();
-    localStorage.setItem("admin_notif_seen", now);
-    setLastSeenAt(now);
+  const fetchNotifications = () => {
+    fetch(`/api/admin/admin-notifications?adminId=${admin.id}`)
+      .then(r => r.json())
+      .then(d => {
+        setAdminNotifications(d.notifications || []);
+        setUnreadCount(d.unreadCount || 0);
+      })
+      .catch(() => {});
   };
 
   useEffect(() => {
-    const fetchNewUsers = () => {
-      fetch("/api/admin/activity").then(r => r.json()).then(d => {
-        const users = (d.activities || []).filter((a: any) => a.type === "user");
-        setNewUsers(users.map((u: any) => {
-          const parts = (u.detail || "").split(" — ");
-          return { id: u.id, name: parts[0] || u.detail, phone: null, email: null, region: parts[2] || "", createdAt: u.time };
-        }));
-      }).catch(() => {});
-    };
-    fetchNewUsers();
-    const interval = setInterval(fetchNewUsers, 30000);
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const markAsSeen = () => {
+    fetch("/api/admin/admin-notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adminId: admin.id }),
+    }).then(() => {
+      setUnreadCount(0);
+    }).catch(() => {});
+  };
 
   const ROLE_PERMISSIONS: Record<string, string[]> = {
     super_admin: [
@@ -1454,19 +1454,19 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
                 <div className="fixed inset-0 z-40" onClick={() => setShowNotifPanel(false)} />
                 <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl border border-beigebrume-200 shadow-lg z-50 py-1 max-h-96 overflow-y-auto">
                   <div className="px-4 py-3 border-b border-beigebrume-100 flex items-center justify-between">
-                    <p className="text-sm font-semibold text-charbon-500">Nouvelles inscriptions</p>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-baobab-100 text-baobab-600 font-medium">{newUsers.length}</span>
+                    <p className="text-sm font-semibold text-charbon-500">Notifications</p>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-baobab-100 text-baobab-600 font-medium">{adminNotifications.length}</span>
                   </div>
-                  {newUsers.length === 0 ? (
+                  {adminNotifications.length === 0 ? (
                     <div className="px-4 py-6 text-center">
-                      <p className="text-sm text-charbon-300">Aucune nouvelle inscription</p>
+                      <p className="text-sm text-charbon-300">Aucune notification</p>
                     </div>
                   ) : (
-                    newUsers.slice(0, 10).map((u) => (
-                      <div key={u.id} className="px-4 py-3 hover:bg-vertbrume-50 border-b border-beigebrume-50 last:border-0">
-                        <p className="text-sm font-medium text-charbon-500">{u.name}</p>
-                        <p className="text-xs text-charbon-300">{u.region || "Région inconnue"}</p>
-                        <p className="text-[10px] text-charbon-200 mt-0.5">{u.createdAt}</p>
+                    adminNotifications.slice(0, 15).map((n) => (
+                      <div key={n.id} className={`px-4 py-3 border-b border-beigebrume-50 last:border-0 ${!n.read ? "bg-vertbrume-50/50" : ""}`}>
+                        <p className="text-sm font-medium text-charbon-500">{n.title}</p>
+                        <p className="text-xs text-charbon-300 mt-0.5">{n.message}</p>
+                        <p className="text-[10px] text-charbon-200 mt-1">{new Date(n.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
                       </div>
                     ))
                   )}

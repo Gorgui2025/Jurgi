@@ -56,6 +56,25 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.create({ data });
 
+    if (needsValidation) {
+      const roleLabels: Record<string, string> = {
+        veterinaire: "Vétérinaire",
+        transporteur: "Transporteur",
+        institution: "Institution",
+        livreur: "Livreur",
+      };
+      const roleLabel = roles.map((r: string) => roleLabels[r] || r).join(", ");
+
+      await prisma.adminNotification.create({
+        data: {
+          type: "new_professional",
+          title: "Nouveau compte à valider",
+          message: `${name} (${roleLabel}) — ${region}${commune ? ", " + commune : ""}. En attente de validation.`,
+          data: JSON.stringify({ userId: user.id, name, roles, region, commune, phone: phone || null }),
+        },
+      });
+    }
+
     return NextResponse.json({
       id: user.id,
       name: user.name,
