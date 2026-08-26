@@ -21,11 +21,16 @@ import {
   ChevronDown,
   Crown,
   Truck,
+  Stethoscope,
+  Building2,
 } from "lucide-react";
 
 const NAV_LINKS = [
   { href: "/marketplace", label: "Marketplace", icon: <Store className="w-4 h-4" /> },
   { href: "/livreurs", label: "Livreurs", icon: <Truck className="w-4 h-4" /> },
+  { href: "/veterinaires", label: "Vétérinaires", icon: <Stethoscope className="w-4 h-4" /> },
+  { href: "/transporteurs", label: "Transporteurs", icon: <Truck className="w-4 h-4" /> },
+  { href: "/institutions", label: "Institutions", icon: <Building2 className="w-4 h-4" /> },
   { href: "/services", label: "Services", icon: <Handshake className="w-4 h-4" /> },
   { href: "/demandes", label: "Demandes", icon: <MessageSquare className="w-4 h-4" /> },
   { href: "/formation", label: "Formation", icon: <BookOpen className="w-4 h-4" /> },

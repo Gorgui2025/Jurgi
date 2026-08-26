@@ -70,6 +70,47 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    if (roles.includes("veterinaire")) {
+      await prisma.vetProfile.create({
+        data: {
+          userId: user.id,
+          displayName: name,
+          phone: phone || null,
+          zones: JSON.stringify(region ? [{ region, commune: commune || "" }] : []),
+          status: "pending",
+          isActive: false,
+        },
+      });
+    }
+
+    if (roles.includes("transporteur")) {
+      await prisma.transporterProfile.create({
+        data: {
+          userId: user.id,
+          displayName: name,
+          phone: phone || null,
+          vehicleType: "Moto",
+          zones: JSON.stringify(region ? [{ region, commune: commune || "" }] : []),
+          status: "pending",
+          isActive: false,
+        },
+      });
+    }
+
+    if (roles.includes("institution")) {
+      await prisma.institutionProfile.create({
+        data: {
+          userId: user.id,
+          displayName: name,
+          phone: phone || null,
+          institutionType: "Autre",
+          zones: JSON.stringify(region ? [{ region, commune: commune || "" }] : []),
+          status: "pending",
+          isActive: false,
+        },
+      });
+    }
+
     if (needsValidation) {
       const roleLabels: Record<string, string> = {
         veterinaire: "Vétérinaire",
