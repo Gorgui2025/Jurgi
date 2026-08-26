@@ -57,6 +57,24 @@ const DEFAULT_PLANS = [
     sortOrder: 2,
     commercialMessage: "Pour les professionnels et éleveurs actifs. Renouvellement possible avec consentement.",
   },
+  {
+    slug: "livreur",
+    name: "Jurgi Livreur",
+    description: "Abonnement livreur. Profil visible, accès aux demandes de livraison, 7 jours d'essai gratuit.",
+    price: 1500,
+    currency: "XOF",
+    durationDays: 30,
+    maxActiveListings: 0,
+    maxPhotosPerListing: 3,
+    maxVideosPerListing: 0,
+    maxVideoSizeMb: 0,
+    autoRenew: false,
+    isTrialEligible: true,
+    isVisible: true,
+    isActive: true,
+    sortOrder: 3,
+    commercialMessage: "7 jours gratuits, puis 1 500 FCFA/mois. Visibilité dans l'annuaire et accès aux demandes.",
+  },
 ];
 
 async function main() {
