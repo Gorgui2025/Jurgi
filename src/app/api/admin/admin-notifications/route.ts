@@ -6,7 +6,12 @@ export async function GET(request: NextRequest) {
   const adminId = searchParams.get("adminId");
 
   const where: Record<string, unknown> = {};
-  if (adminId) where.adminId = adminId;
+  if (adminId) {
+    where.OR = [
+      { adminId: null },
+      { adminId: adminId },
+    ];
+  }
 
   const notifications = await prisma.adminNotification.findMany({
     where,
