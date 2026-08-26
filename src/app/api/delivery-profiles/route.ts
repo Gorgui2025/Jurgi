@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         ],
       },
       include: {
-        user: { select: { id: true, name: true, avatar: true, isVerified: true } },
+        user: { select: { id: true, name: true, avatar: true, isVerified: true, lastSeen: true } },
       },
       orderBy: { createdAt: "desc" },
       skip,
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     prisma.deliveryProfile.findMany({
       where,
       include: {
-        user: { select: { id: true, name: true, avatar: true, isVerified: true } },
+        user: { select: { id: true, name: true, avatar: true, isVerified: true, lastSeen: true } },
       },
       orderBy: { createdAt: "desc" },
       skip,
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
         isActive: isAdminValidated,
       },
       include: {
-        user: { select: { id: true, name: true, avatar: true, isVerified: true } },
+        user: { select: { id: true, name: true, avatar: true, isVerified: true, lastSeen: true } },
       },
     });
 

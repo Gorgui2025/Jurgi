@@ -15,6 +15,7 @@ import {
   Clock,
   DollarSign,
 } from "lucide-react";
+import OnlineBadge from "@/components/OnlineBadge";
 
 const REGIONS = [
   "Toutes",
@@ -58,6 +59,8 @@ interface VetProfile {
   consultationFees: number | null;
   availability: string | null;
   isVerified: boolean;
+  lastSeen: string | null;
+  user?: { lastSeen?: string | null };
 }
 
 function getInitials(name: string | null) {
@@ -335,6 +338,7 @@ function VeterinairesContent() {
                       <h3 className="font-semibold text-charbon-500 truncate">
                         {displayName}
                       </h3>
+                      <OnlineBadge lastSeen={profile.user?.lastSeen || null} className="ml-1" />
                       {profile.isVerified && (
                         <span className="badge-verified text-[11px] shrink-0">
                           <Shield className="w-3 h-3" /> Vérifié

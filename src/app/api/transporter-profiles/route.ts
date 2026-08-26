@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   const [profiles, total] = await Promise.all([
     prisma.transporterProfile.findMany({
       where: searchWhere,
-      include: { user: { select: { id: true, name: true, avatar: true, isVerified: true } } },
+      include: { user: { select: { id: true, name: true, avatar: true, isVerified: true, lastSeen: true } } },
       orderBy: { createdAt: "desc" },
       skip,
       take: limit,
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         status: "pending",
         isActive: false,
       },
-      include: { user: { select: { id: true, name: true, avatar: true, isVerified: true } } },
+      include: { user: { select: { id: true, name: true, avatar: true, isVerified: true, lastSeen: true } } },
     });
 
     return NextResponse.json(profile, { status: 201 });
@@ -108,7 +108,7 @@ export async function PATCH(request: NextRequest) {
     const profile = await prisma.transporterProfile.update({
       where: { userId },
       data: updateData,
-      include: { user: { select: { id: true, name: true, avatar: true, isVerified: true } } },
+      include: { user: { select: { id: true, name: true, avatar: true, isVerified: true, lastSeen: true } } },
     });
 
     return NextResponse.json(profile);

@@ -14,6 +14,7 @@ import {
   Shield,
   Clock,
 } from "lucide-react";
+import OnlineBadge from "@/components/OnlineBadge";
 
 const REGIONS = [
   "Toutes",
@@ -78,6 +79,8 @@ interface DeliveryDriver {
   bio: string | null;
   rating: number | null;
   reviewCount: number;
+  lastSeen: string | null;
+  user?: { lastSeen?: string | null };
 }
 
 function getInitials(name: string | null) {
@@ -401,6 +404,7 @@ function LivreursContent() {
                       <h3 className="font-semibold text-charbon-500 truncate">
                         {driver.name || "Livreur"}
                       </h3>
+                      <OnlineBadge lastSeen={driver.user?.lastSeen || null} className="ml-1" />
                       {driver.isVerified && (
                         <span className="badge-verified text-[11px] shrink-0">
                           <Shield className="w-3 h-3" /> Vérifié
