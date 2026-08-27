@@ -18,7 +18,7 @@ export default function OnlineBadge({ lastSeen, className = "" }: { lastSeen: st
       } ${className}`}
     >
       <span className={`w-2 h-2 rounded-full ${online ? "bg-vertprofond-500" : "bg-charbon-300"}`} />
-      {online ? "Disponible" : "Indisponible"}
+      {online ? "En ligne" : "Hors ligne"}
     </span>
   );
 }
