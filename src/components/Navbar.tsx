@@ -228,6 +228,13 @@ export default function Navbar() {
                   <LogIn className="w-4 h-4" />
                   <span className="hidden md:inline">Se connecter</span>
                 </Link>
+                <Link
+                  href="/inscription"
+                  className="hidden sm:flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-baobab-500 rounded-lg hover:bg-baobab-600 transition-colors"
+                >
+                  <span className="hidden md:inline">Créer un compte</span>
+                  <span className="md:hidden">Inscription</span>
+                </Link>
               </>
             )}
 
