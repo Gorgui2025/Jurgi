@@ -127,29 +127,18 @@ export default function Navbar() {
               <Search className="w-5 h-5 text-charbon-400" />
             </Link>
 
-            {/* Publier */}
             <Link href="/publier" className="hidden sm:flex btn-primary text-sm py-2 px-4 gap-1.5">
               <Plus className="w-4 h-4" />
               <span className="hidden md:inline">Publier</span>
             </Link>
 
-            {isLoggedIn ? (
+            {isLoggedIn && (
               <>
-                {/* Messages */}
-                <Link
-                  href="/messages"
-                  className="relative p-2.5 rounded-lg hover:bg-vertbrume-50 transition-colors"
-                  aria-label="Messages"
-                >
+                <Link href="/messages" className="relative p-2.5 rounded-lg hover:bg-vertbrume-50 transition-colors" aria-label="Messages">
                   <MessageSquare className="w-5 h-5 text-charbon-400" />
                 </Link>
 
-                {/* Notifications */}
-                <Link
-                  href="/notifications"
-                  className="relative p-2.5 rounded-lg hover:bg-vertbrume-50 transition-colors"
-                  aria-label="Notifications"
-                >
+                <Link href="/notifications" className="relative p-2.5 rounded-lg hover:bg-vertbrume-50 transition-colors" aria-label="Notifications">
                   <Bell className="w-5 h-5 text-charbon-400" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-rougeterre-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
@@ -158,16 +147,10 @@ export default function Navbar() {
                   )}
                 </Link>
 
-                {/* User menu - desktop */}
                 <div className="relative hidden sm:block">
-                  <button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-vertbrume-50 transition-colors"
-                  >
+                  <button onClick={() => setUserMenuOpen(!userMenuOpen)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-vertbrume-50 transition-colors">
                     <div className="w-8 h-8 bg-baobab-100 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-semibold text-baobab-600">
-                        {user.name?.charAt(0) || "U"}
-                      </span>
+                      <span className="text-sm font-semibold text-baobab-600">{user.name?.charAt(0) || "U"}</span>
                     </div>
                     <span className="text-sm font-medium text-charbon-500 max-w-[100px] truncate">{user.name || "Mon compte"}</span>
                     <ChevronDown className="w-4 h-4 text-charbon-300" />
@@ -181,80 +164,49 @@ export default function Navbar() {
                           <p className="text-sm font-semibold text-charbon-500 truncate">{user.name}</p>
                           <p className="text-xs text-charbon-300 truncate">{user.email || user.phone}</p>
                         </div>
-                        <Link
-                          href="/profil"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 transition-colors"
-                        >
-                          <User className="w-4 h-4" />
-                          Mon profil
+                        <Link href="/profil" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 transition-colors">
+                          <User className="w-4 h-4" /> Mon profil
                         </Link>
-                        <Link
-                          href="/mes-annonces"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 transition-colors"
-                        >
-                          <Store className="w-4 h-4" />
-                          Mes annonces
+                        <Link href="/mes-annonces" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 transition-colors">
+                          <Store className="w-4 h-4" /> Mes annonces
                         </Link>
-                        <Link
-                          href="/abonnement"
-                          onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 transition-colors"
-                        >
-                          <Crown className="w-4 h-4" />
-                          Abonnement
+                        <Link href="/abonnement" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 transition-colors">
+                          <Crown className="w-4 h-4" /> Abonnement
                         </Link>
                         <div className="border-t border-beigebrume-100 my-1" />
-                        <button
-                          onClick={handleSignOut}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-rougeterre-500 hover:bg-rougeterre-50 w-full transition-colors"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Déconnexion
+                        <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 text-sm text-rougeterre-500 hover:bg-rougeterre-50 w-full transition-colors">
+                          <LogOut className="w-4 h-4" /> Déconnexion
                         </button>
                       </div>
                     </>
                   )}
                 </div>
               </>
-            ) : (
-              <div className="hidden sm:flex items-center gap-2 ml-auto">
-                <Link
-                  href="/connexion"
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-baobab-500 border border-baobab-500 rounded-lg hover:bg-baobab-50 transition-colors"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden md:inline">Se connecter</span>
-                </Link>
-                <Link
-                  href="/inscription"
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-baobab-500 rounded-lg hover:bg-baobab-600 transition-colors"
-                >
-                  <span className="hidden md:inline">Créer un compte</span>
-                  <span className="md:hidden">Inscription</span>
-                </Link>
-              </div>
             )}
 
-            {/* Mobile Publier */}
             <Link href="/publier" className="sm:hidden p-2.5 rounded-lg bg-baobab-500 text-white hover:bg-baobab-600 transition-colors" aria-label="Publier">
               <Plus className="w-5 h-5" />
             </Link>
 
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-2.5 rounded-lg hover:bg-vertbrume-50 transition-colors"
-              aria-label="Menu"
-              aria-expanded={mobileOpen}
-            >
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden p-2.5 rounded-lg hover:bg-vertbrume-50 transition-colors" aria-label="Menu" aria-expanded={mobileOpen}>
               {mobileOpen ? <X className="w-5 h-5 text-charbon-400" /> : <Menu className="w-5 h-5 text-charbon-400" />}
             </button>
           </div>
+
+          {!isLoggedIn && (
+            <div className="hidden sm:flex items-center gap-2 ml-4 shrink-0">
+              <Link href="/connexion" className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-baobab-500 border border-baobab-500 rounded-lg hover:bg-baobab-50 transition-colors">
+                <LogIn className="w-4 h-4" />
+                <span className="hidden md:inline">Se connecter</span>
+              </Link>
+              <Link href="/inscription" className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-baobab-500 rounded-lg hover:bg-baobab-600 transition-colors">
+                <span className="hidden md:inline">Créer un compte</span>
+                <span className="md:hidden">Inscription</span>
+              </Link>
+            </div>
+          )}
         </div>
 
-        {/* Mobile search */}
         <div className="md:hidden pb-3">
           <form
             onSubmit={(e) => {
@@ -278,19 +230,12 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* Mobile menu */}
         {mobileOpen && (
           <div className="lg:hidden pb-4 border-t border-beigebrume-200 pt-3">
             <div className="flex flex-col gap-0.5">
               {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors"
-                >
-                  {link.icon}
-                  {link.label}
+                <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors">
+                  {link.icon} {link.label}
                 </Link>
               ))}
               <div className="border-t border-beigebrume-100 my-2" />
@@ -301,73 +246,35 @@ export default function Navbar() {
                     <p className="text-sm font-semibold text-charbon-500">{user.name}</p>
                     <p className="text-xs text-charbon-300">{user.email || user.phone}</p>
                   </div>
-                  <Link
-                    href="/profil"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors"
-                  >
-                    <User className="w-4 h-4" />
-                    Mon profil
+                  <Link href="/profil" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors">
+                    <User className="w-4 h-4" /> Mon profil
                   </Link>
-                  <Link
-                    href="/mes-annonces"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors"
-                  >
-                    <Store className="w-4 h-4" />
-                    Mes annonces
+                  <Link href="/mes-annonces" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors">
+                    <Store className="w-4 h-4" /> Mes annonces
                   </Link>
-                  <Link
-                    href="/abonnement"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors"
-                  >
-                    <Crown className="w-4 h-4" />
-                    Abonnement
+                  <Link href="/abonnement" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors">
+                    <Crown className="w-4 h-4" /> Abonnement
                   </Link>
-                  <Link
-                    href="/messages"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    Messages
+                  <Link href="/messages" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors">
+                    <MessageSquare className="w-4 h-4" /> Messages
                   </Link>
-                  <Link
-                    href="/notifications"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors"
-                  >
-                    <Bell className="w-4 h-4" />
-                    Notifications
+                  <Link href="/notifications" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-charbon-400 hover:text-baobab-500 hover:bg-vertbrume-50 rounded-lg transition-colors">
+                    <Bell className="w-4 h-4" /> Notifications
                     {unreadCount > 0 && (
                       <span className="ml-auto bg-rougeterre-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{unreadCount}</span>
                     )}
                   </Link>
                   <div className="border-t border-beigebrume-100 my-2" />
-                  <button
-                    onClick={() => { handleSignOut(); setMobileOpen(false); }}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-rougeterre-500 hover:bg-rougeterre-50 rounded-lg transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Déconnexion
+                  <button onClick={() => { handleSignOut(); setMobileOpen(false); }} className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-rougeterre-500 hover:bg-rougeterre-50 rounded-lg transition-colors">
+                    <LogOut className="w-4 h-4" /> Déconnexion
                   </button>
                 </>
               ) : (
                 <>
-                  <Link
-                    href="/connexion"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-center gap-2 mx-4 mt-1 px-4 py-3 text-sm font-medium text-baobab-500 border border-baobab-500 rounded-xl hover:bg-baobab-50 transition-colors"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    Se connecter
+                  <Link href="/connexion" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 mx-4 mt-1 px-4 py-3 text-sm font-medium text-baobab-500 border border-baobab-500 rounded-xl hover:bg-baobab-50 transition-colors">
+                    <LogIn className="w-4 h-4" /> Se connecter
                   </Link>
-                  <Link
-                    href="/inscription"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-center gap-2 mx-4 mt-2 px-4 py-3 text-sm font-medium text-white bg-baobab-500 rounded-xl hover:bg-baobab-600 transition-colors"
-                  >
+                  <Link href="/inscription" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 mx-4 mt-2 px-4 py-3 text-sm font-medium text-white bg-baobab-500 rounded-xl hover:bg-baobab-600 transition-colors">
                     Créer un compte
                   </Link>
                 </>
