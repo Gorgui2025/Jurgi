@@ -122,7 +122,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 ml-auto">
             <Link href="/marketplace" className="md:hidden p-2.5 rounded-lg hover:bg-vertbrume-50 transition-colors" aria-label="Rechercher">
               <Search className="w-5 h-5 text-charbon-400" />
             </Link>
@@ -184,6 +184,19 @@ export default function Navbar() {
               </>
             )}
 
+            {!isLoggedIn && (
+              <div className="hidden sm:flex items-center gap-2">
+                <Link href="/connexion" className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-baobab-500 border border-baobab-500 rounded-lg hover:bg-baobab-50 transition-colors">
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden md:inline">Se connecter</span>
+                </Link>
+                <Link href="/inscription" className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-baobab-500 rounded-lg hover:bg-baobab-600 transition-colors">
+                  <span className="hidden md:inline">Créer un compte</span>
+                  <span className="md:hidden">Inscription</span>
+                </Link>
+              </div>
+            )}
+
             <Link href="/publier" className="sm:hidden p-2.5 rounded-lg bg-baobab-500 text-white hover:bg-baobab-600 transition-colors" aria-label="Publier">
               <Plus className="w-5 h-5" />
             </Link>
@@ -192,19 +205,6 @@ export default function Navbar() {
               {mobileOpen ? <X className="w-5 h-5 text-charbon-400" /> : <Menu className="w-5 h-5 text-charbon-400" />}
             </button>
           </div>
-
-          {!isLoggedIn && (
-            <div className="hidden sm:flex items-center gap-2 ml-4 shrink-0">
-              <Link href="/connexion" className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-baobab-500 border border-baobab-500 rounded-lg hover:bg-baobab-50 transition-colors">
-                <LogIn className="w-4 h-4" />
-                <span className="hidden md:inline">Se connecter</span>
-              </Link>
-              <Link href="/inscription" className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-baobab-500 rounded-lg hover:bg-baobab-600 transition-colors">
-                <span className="hidden md:inline">Créer un compte</span>
-                <span className="md:hidden">Inscription</span>
-              </Link>
-            </div>
-          )}
         </div>
 
         <div className="md:hidden pb-3">
