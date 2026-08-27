@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import DeliveryDriversTab from "./DeliveryDriversTab";
 import ProfessionalsTab from "./ProfessionalsTab";
+import RequestsTab from "./RequestsTab";
 import {
   Users, FileText, Flag, BarChart3, Settings, Shield, CheckCircle, XCircle,
   Ban, AlertTriangle, Clock, Globe, Mail, Phone, ShieldCheck, Key, LogOut,
@@ -1509,7 +1510,7 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
           {activeTab === "subscriptions" && <SubscriptionsTab admin={admin} />}
           {activeTab === "payments" && <PaymentsTab admin={admin} />}
           {activeTab === "ai" && <AiTab admin={admin} />}
-          {activeTab === "requests" && <PlaceholderTab title="Demandes d'achat" desc="Suivi des demandes publiées par les éleveurs" />}
+          {activeTab === "requests" && <RequestsTab />}
           {activeTab === "professionals" && <ProfessionalsTab onAction={fetchNotifications} />}
           {activeTab === "deliveryDrivers" && <DeliveryDriversTab onAction={fetchNotifications} />}
           {activeTab === "messages" && <PlaceholderTab title="Messages signalés" desc="Conversations nécessitant une intervention" />}
