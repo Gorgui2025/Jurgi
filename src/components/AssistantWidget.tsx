@@ -173,42 +173,6 @@ export default function AssistantWidget() {
                 </div>
               )
             )}
-            {showFeedback && (
-              <div className="flex items-start gap-2">
-                <div className="w-7 h-7 rounded-full bg-white border border-beigebrume-200 flex items-center justify-center shrink-0 p-0.5 mt-0.5">
-                  <SecretaryAvatar size={26} />
-                </div>
-                <div className="bg-white rounded-2xl rounded-bl-sm px-3.5 py-3 max-w-[85%] text-sm shadow-sm space-y-2">
-                  {feedbackSent ? (
-                    <p className="text-xs text-baobab-600">Merci pour votre retour ! 🙏</p>
-                  ) : (
-                    <>
-                      <p className="text-xs font-medium text-charbon-500">Comment puis-je améliorer le secrétariat Siny ?</p>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <button
-                            key={n}
-                            onClick={() => submitFeedback(n)}
-                            className={`w-7 h-7 rounded-full text-sm flex items-center justify-center ${feedbackRating === n ? "bg-ocre-500 text-white" : "bg-beigebrume-100 text-charbon-400 hover:bg-ocre-100"}`}
-                            title={`${n} étoile${n > 1 ? "s" : ""}`}
-                          >
-                            {n}
-                          </button>
-                        ))}
-                      </div>
-                      <input
-                        value={feedbackComment}
-                        onChange={(e) => setFeedbackComment(e.target.value)}
-                        placeholder="Un commentaire (optionnel)"
-                        className="text-xs w-full px-2 py-1.5 rounded-lg border border-beigebrume-200 focus:outline-none focus:ring-2 focus:ring-baobab-500"
-                      />
-                      <p className="text-[10px] text-charbon-200">Votre note est envoyée après le dernier échange.</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
             {loading && (
               <div className="flex items-start gap-2">
                 <div className="w-7 h-7 rounded-full bg-white border border-beigebrume-200 flex items-center justify-center shrink-0 p-0.5 mt-0.5">
@@ -221,6 +185,46 @@ export default function AssistantWidget() {
               </div>
             )}
           </div>
+
+          {showFeedback && (
+            <div className="border-t border-beigebrume-200 bg-white p-3 space-y-2">
+              {feedbackSent ? (
+                <p className="text-xs text-baobab-600 font-medium">Merci pour votre retour ! 🙏</p>
+              ) : (
+                <>
+                  <p className="text-xs font-medium text-charbon-500">Comment puis-je améliorer le secrétariat Siny ?</p>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => submitFeedback(n)}
+                        className={`w-8 h-8 rounded-full text-sm flex items-center justify-center transition ${
+                          feedbackRating === n ? "bg-ocre-500 text-white" : "bg-beigebrume-100 text-charbon-400 hover:bg-ocre-100"
+                        }`}
+                        title={`${n} étoile${n > 1 ? "s" : ""}`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      value={feedbackComment}
+                      onChange={(e) => setFeedbackComment(e.target.value)}
+                      placeholder="Un commentaire (optionnel)"
+                      className="text-xs flex-1 px-2.5 py-1.5 rounded-lg border border-beigebrume-200 focus:outline-none focus:ring-2 focus:ring-baobab-500"
+                    />
+                    <button
+                      onClick={() => setShowFeedback(false)}
+                      className="text-[11px] px-2.5 py-1.5 rounded-lg bg-beigebrume-100 text-charbon-400 hover:bg-beigebrume-200"
+                    >
+                      Fermer
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           <div className="border-t border-beigebrume-200 bg-beigebrume-50/50 flex items-center justify-between px-3 py-1.5">
             <button
