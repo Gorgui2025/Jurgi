@@ -50,6 +50,7 @@ function renderInline(text: string) {
 
 export default function AssistantWidget() {
   const [open, setOpen] = useState(false);
+  const [sessionId, setSessionId] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
@@ -59,23 +60,40 @@ export default function AssistantWidget() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [userCount, setUserCount] = useState(0);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackComment, setFeedbackComment] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!sessionId) {
+      setSessionId(
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : "s-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10)
+      );
+    }
+  }, [sessionId]);
+
+  useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
-  }, [messages, loading, open]);
+  }, [messages, loading, open, showFeedback]);
 
   const ask = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
     setInput("");
     setMessages((prev) => [...prev, { role: "user", text: trimmed }]);
+    setUserCount((c) => c + 1);
     setLoading(true);
+    setShowFeedback(false);
     try {
       const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: trimmed }),
+        body: JSON.stringify({ question: trimmed, sessionId }),
       });
       const data = await res.json();
       setMessages((prev) => [
@@ -86,6 +104,24 @@ export default function AssistantWidget() {
       setMessages((prev) => [...prev, { role: "assistant", text: "Une erreur est survenue. Veuillez réessayer. 🙏" }]);
     } finally {
       setLoading(false);
+      const next = userCount + 1;
+      if (next >= 3 && !feedbackSent && sessionId) {
+        setTimeout(() => setShowFeedback(true), 600);
+      }
+    }
+  };
+
+  const submitFeedback = async (rating: number) => {
+    setFeedbackRating(rating);
+    setFeedbackSent(true);
+    try {
+      await fetch("/api/assistant/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, rating, comment: feedbackComment || null }),
+      });
+    } catch {
+      // ignore
     }
   };
 
@@ -136,6 +172,42 @@ export default function AssistantWidget() {
                 </div>
               )
             )}
+            {showFeedback && (
+              <div className="flex items-start gap-2">
+                <div className="w-7 h-7 rounded-full bg-white border border-beigebrume-200 flex items-center justify-center shrink-0 p-0.5 mt-0.5">
+                  <SecretaryAvatar size={26} />
+                </div>
+                <div className="bg-white rounded-2xl rounded-bl-sm px-3.5 py-3 max-w-[85%] text-sm shadow-sm space-y-2">
+                  {feedbackSent ? (
+                    <p className="text-xs text-baobab-600">Merci pour votre retour ! 🙏</p>
+                  ) : (
+                    <>
+                      <p className="text-xs font-medium text-charbon-500">Comment puis-je améliorer le secrétariat Siny ?</p>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <button
+                            key={n}
+                            onClick={() => submitFeedback(n)}
+                            className={`w-7 h-7 rounded-full text-sm flex items-center justify-center ${feedbackRating === n ? "bg-ocre-500 text-white" : "bg-beigebrume-100 text-charbon-400 hover:bg-ocre-100"}`}
+                            title={`${n} étoile${n > 1 ? "s" : ""}`}
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                      <input
+                        value={feedbackComment}
+                        onChange={(e) => setFeedbackComment(e.target.value)}
+                        placeholder="Un commentaire (optionnel)"
+                        className="text-xs w-full px-2 py-1.5 rounded-lg border border-beigebrume-200 focus:outline-none focus:ring-2 focus:ring-baobab-500"
+                      />
+                      <p className="text-[10px] text-charbon-200">Votre note est envoyée après le dernier échange.</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
             {loading && (
               <div className="flex items-start gap-2">
                 <div className="w-7 h-7 rounded-full bg-white border border-beigebrume-200 flex items-center justify-center shrink-0 p-0.5 mt-0.5">

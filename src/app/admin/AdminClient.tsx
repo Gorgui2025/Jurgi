@@ -7,6 +7,7 @@ import ProfessionalsTab from "./ProfessionalsTab";
 import RequestsTab from "./RequestsTab";
 import FinanceTab from "./FinanceTab";
 import MessagesTab from "./MessagesTab";
+import SinyAnalyticsTab from "./SinyAnalyticsTab";
 import {
   Users, FileText, Flag, BarChart3, Settings, Shield, CheckCircle, XCircle,
   Ban, AlertTriangle, Clock, Globe, Mail, Phone, ShieldCheck, Key, LogOut,
@@ -41,6 +42,7 @@ const ALL_TABS = [
   { id: "subscriptions", label: "Abonnements", icon: "Crown", perm: "finance" },
   { id: "finance", label: "Finance", icon: "Wallet", perm: "finance" },
   { id: "ai", label: "Assistant IA", icon: "Bot", perm: "ai_assistant" },
+  { id: "siny", label: "Siny Analytique", icon: "Bot", perm: "ai_assistant" },
 ];
 
 const TAB_ICONS: Record<string, React.ReactNode> = {
@@ -1500,6 +1502,7 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
           {activeTab === "subscriptions" && <SubscriptionsTab admin={admin} />}
           {activeTab === "payments" && <PaymentsTab admin={admin} />}
           {activeTab === "ai" && <AiTab admin={admin} />}
+          {activeTab === "siny" && <SinyAnalyticsTab />}
           {activeTab === "requests" && <RequestsTab />}
           {activeTab === "professionals" && <ProfessionalsTab onAction={fetchNotifications} />}
           {activeTab === "deliveryDrivers" && <DeliveryDriversTab onAction={fetchNotifications} />}

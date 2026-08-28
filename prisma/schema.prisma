@@ -53,6 +53,8 @@ model User {
   transporterProfile TransporterProfile?
   institutionProfile InstitutionProfile?
   deliveryRequests DeliveryRequest[]
+  secretaryLogs SecretaryLog[]
+  secretaryFeedback SecretaryFeedback[]
 }
 
 model Admin {
@@ -670,4 +672,38 @@ model InstitutionProfile {
 
   @@index([userId])
   @@index([status])
+}
+
+model SecretaryLog {
+  id        String   @id @default(cuid())
+  sessionId String
+  userId    String?
+  question  String
+  intent    String
+  answer    String
+  answered  Boolean  @default(true)
+  region    String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId])
+  @@index([intent])
+  @@index([answered])
+  @@index([createdAt])
+}
+
+model SecretaryFeedback {
+  id        String   @id @default(cuid())
+  sessionId String
+  userId    String?
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([rating])
+  @@index([createdAt])
 }

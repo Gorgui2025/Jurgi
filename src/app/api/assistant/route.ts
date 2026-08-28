@@ -39,7 +39,7 @@ function findIntent(q: string): string {
   return "fallback";
 }
 
-function faqAnswer(intent: string, phone: string = DEFAULT_PAYMENT_PHONE): { answer: string; replies: string[] } {
+function faqAnswer(intent: string, phone: string = DEFAULT_PAYMENT_PHONE): { answer: string; quickReplies: string[] } {
   const replies = [
     "Comment publier une annonce ?",
     "Comment payer mon abonnement ?",
@@ -51,43 +51,43 @@ function faqAnswer(intent: string, phone: string = DEFAULT_PAYMENT_PHONE): { ans
       return {
         answer:
           "Oui, vous pouvez **publier des vidéos** sur vos annonces Jurgi ! 🎬\n\n1. Pendant la publication (ou en modifiant une annonce), ajoutez vos **vidéos** (au format MP4) dans la section média.\n2. Référez-vous au **nombre de vidéos** autorisé selon votre formule (voir les abonnements).\n3. Vos acheteurs pourront voir la vidéo directement sur votre annonce.\n\n💡 Le nombre de vidéos et la taille max varient selon votre **abonnement** : consultez la page Abonnements pour connaître votre plafond exact.",
-        replies: ["Trouver un vétérinaire", "Comment publier une annonce ?", "Combien coûte un abonnement ?", "Comment payer ?"],
+        quickReplies: ["Trouver un vétérinaire", "Comment publier une annonce ?", "Combien coûte un abonnement ?", "Comment payer ?"],
       };
     case "how_publish":
       return {
         answer:
           "Pour publier une annonce sur Jurgi, c'est simple :\n\n1. Créez votre **compte** (gratuit) via l'onglet \"Créer un compte\".\n2. Cliquez sur le bouton **+ Publier / Vendre**.\n3. Remplissez le formulaire : titre, description, prix, photos, région et catégorie.\n4. Validez : votre annonce apparaît aussitôt dans la **Marketplace**.\n\n💡 Astuce : des photos claires et un prix précis augmentent beaucoup vos chances. Une fois publiée, les acheteurs peuvent vous contacter directement (appel ou WhatsApp).",
-        replies: ["Vendre un animal", "Comment passer une annonce ?", "Comment payer ?", "Trouver un vétérinaire"],
+        quickReplies: ["Vendre un animal", "Comment passer une annonce ?", "Comment payer ?", "Trouver un vétérinaire"],
     };
     case "how_register":
       return {
         answer:
           "Créer un compte sur Jurgi est **gratuit et immédiat** :\n\n1. Cliquez sur **\"Créer un compte\"** en haut de la page.\n2. Renseignez votre numéro de téléphone et votre nom.\n3. Ajoutez votre mot de passe.\n4. C'est fait ! Vous pouvez publier, répondre aux demandes et envoyer des messages.\n\nVous pouvez aussi choisir un profil professionnel (vétérinaire, transporteur, institution ou livreur) — celui-ci sera validé par un administrateur avant activation.",
-        replies: ["Comment publier une annonce ?", "Devenir vétérinaire", "Combien ça coûte ?", "Payer mon abonnement"],
+        quickReplies: ["Comment publier une annonce ?", "Devenir vétérinaire", "Combien ça coûte ?", "Payer mon abonnement"],
     };
     case "how_login":
       return {
         answer:
           "Pour vous connecter à Jurgi :\n\n1. Cliquez sur **\"Se connecter\"** en haut de la page.\n2. Saisissez votre **numéro de téléphone** (ou email) et votre **mot de passe**.\n3. Vous arrivez sur votre espace personnel.\n\nSi vous avez oublié votre mot de passe, utilisez le lien **\"Mot de passe oublié ?\"** en bas du formulaire : un nouveau mot de passe vous sera envoyé.",
-        replies: ["Mot de passe oublié", "Comment publier ?", "Payer mon abonnement", "Contacter le support"],
+        quickReplies: ["Mot de passe oublié", "Comment publier ?", "Payer mon abonnement", "Contacter le support"],
     };
     case "about":
       return {
         answer:
           "**Jurgi** est la plateforme numérique qui connecte tous les acteurs de l'élevage au Sénégal : éleveurs, vendeurs, vétérinaires, transporteurs, institutions et acheteurs.\n\nEn un seul endroit vous pouvez :\n• 🐑 Acheter / vendre des animaux et produits (marketplace)\n• 🔬 Trouver des vétérinaires et services\n • 🚚 Connecter des transporteurs et livreurs\n• 📢 Poster ou consulter des demandes d'achat\n\nNotre mission : centraliser l'offre, faciliter la mise en relation et soutenir la digitalisation progressive du secteur.",
-        replies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Les abonnements", "Contacter le support"],
+        quickReplies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Les abonnements", "Contacter le support"],
     };
     case "contact":
       return {
         answer:
           "Vous pouvez nous joindre par le formulaire de la page **Contact** sur le site, en écrivant un message que notre équipe lira.\n\n📞 **Paiements (Mobile Money)** : **" + phone + "**\n\nNotre équipe support vous répondra rapidement pour toute question, remarque ou problème rencontré.",
-        replies: ["Comment payer mon abonnement ?", "Comment publier une annonce ?", "Autre question"],
+        quickReplies: ["Comment payer mon abonnement ?", "Comment publier une annonce ?", "Autre question"],
     };
     default:
       return {
         answer:
           "Je suis votre secrétariat Jurgi. 🤝 Je peux vous aider à :\n• 📝 **Publier une annonce**\n• 🐑 **Trouver un animal / produit**\n• 🔬 **Trouver un vétérinaire, transporteur, livreur ou institution**\n• 💳 **Payer votre abonnement**\n• ❓ Répondre à vos questions sur la plateforme\n\nPosez-moi votre question, ou tapez par exemple « comment publier une annonce ».",
-        replies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Combien coûte un abonnement ?", "Comment payer ?"],
+        quickReplies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Combien coûte un abonnement ?", "Comment payer ?"],
     };
   }
 }
@@ -127,50 +127,42 @@ function buildVetAnswer(rows: any[]): AssistantReply {
   };
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const question: string = String(body.question || "").trim();
-    if (!question) {
-      return NextResponse.json({ error: "Question vide" }, { status: 400 });
-    }
+async function resolveAssistant(
+  question: string,
+  ctx: { sessionId: string; userId?: string | null }
+): Promise<AssistantReply> {
+  const configs = await prisma.siteConfig.findMany().catch(() => []);
+  const getConfig = (key: string, fallback: string): string => {
+    const found = configs.find((c) => c.key === key);
+    return found ? found.value : fallback;
+  };
+  const paymentPhone = getConfig("payment_phone_number", DEFAULT_PAYMENT_PHONE) || DEFAULT_PAYMENT_PHONE;
+  const videosEnabled = getConfig("videos_enabled", "true") !== "false";
 
-    const configs = await prisma.siteConfig.findMany().catch(() => []);
-    const getConfig = (key: string, fallback: string): string => {
-      const found = configs.find((c) => c.key === key);
-      return found ? found.value : fallback;
+  const intent = findIntent(question);
+
+  if (intent === "greeting") {
+    return {
+      intent,
+      answer:
+        "Bonjour et bienvenue sur Jurgi ! 👋 Je suis votre secrétariat virtuel. Comment puis-je vous aider aujourd'hui ?",
+      quickReplies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Combien coûte un abonnement ?", "Payer mon abonnement"],
     };
-    const paymentPhone = getConfig("payment_phone_number", DEFAULT_PAYMENT_PHONE) || DEFAULT_PAYMENT_PHONE;
-    const videosEnabled = getConfig("videos_enabled", "true") !== "false";
+  }
 
-    const intent = findIntent(question);
-
-    if (intent === "greeting") {
-      return NextResponse.json({
-        reply: {
-          intent,
-          answer:
-            "Bonjour et bienvenue sur Jurgi ! 👋 Je suis votre secrétariat virtuel. Comment puis-je vous aider aujourd'hui ?",
-          quickReplies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Combien coûte un abonnement ?", "Payer mon abonnement"],
-        },
-      });
-    }
-
-    if (intent === "how_publish" || intent === "how_register" || intent === "how_login" || intent === "about" || intent === "contact") {
-      return NextResponse.json({ reply: { intent, ...faqAnswer(intent, paymentPhone) } });
-    }
+  if (intent === "how_publish" || intent === "how_register" || intent === "how_login" || intent === "about" || intent === "contact") {
+    return { intent, ...faqAnswer(intent, paymentPhone) };
+  }
 
     if (intent === "payment") {
       const plan = await prisma.plan.findUnique({ where: { slug: "livreur" } }).catch(() => null);
       const livreurMsg = plan ? `**${plan.price.toLocaleString("fr-FR")} FCFA / ${plan.durationDays} jours** (avec 7 jours d'essai gratuit)` : "1500 FCFA / 30 jours (avec essai gratuit)";
-      return NextResponse.json({
-        reply: {
-          intent,
-          answer:
-            "Pour payer votre abonnement Jurgi :\n\n1. Rendez-vous dans votre espace et choisissez votre **formule** (page Abonnements).\n2. Effectuez le paiement **Mobile Money** (Wave / Orange Money) vers :\n   **📞 " + paymentPhone + "**\n3. Envoyez-nous votre **preuve de paiement** : notre équipe valide et active votre compte (vous recevez un **code d'activation**).\n\nConcernant le **profil livreur** : l'abonnement est à " + livreurMsg + ".\n\n💡 Le paiement est validé par notre équipe, généralement sous quelques heures.",
-          quickReplies: ["Combien coûtent les abonnements ?", "Comment publier ?", "Puis-je vendre gratuitement ?", "Autre question"],
-        },
-      });
+      return {
+        intent,
+        answer:
+          "Pour payer votre abonnement Jurgi :\n\n1. Rendez-vous dans votre espace et choisissez votre **formule** (page Abonnements).\n2. Effectuez le paiement **Mobile Money** (Wave / Orange Money) vers :\n   **📞 " + paymentPhone + "**\n3. Envoyez-nous votre **preuve de paiement** : notre équipe valide et active votre compte (vous recevez un **code d'activation**).\n\nConcernant le **profil livreur** : l'abonnement est à " + livreurMsg + ".\n\n💡 Le paiement est validé par notre équipe, généralement sous quelques heures.",
+        quickReplies: ["Combien coûtent les abonnements ?", "Comment publier ?", "Puis-je vendre gratuitement ?", "Autre question"],
+      };
     }
 
     if (intent === "plans") {
@@ -189,26 +181,22 @@ export async function POST(request: NextRequest) {
           .join("\n");
         answer += "\n\nVous pouvez payer via **Mobile Money** : 📞 **" + paymentPhone + "**.";
       }
-      return NextResponse.json({
-        reply: {
-          intent,
-          answer,
-          quickReplies: ["Comment payer ?", "Comment publier une annonce ?", "Je veux vendre gratuitement", "Autre question"],
-          data: plans,
-        },
-      });
+      return {
+        intent,
+        answer,
+        quickReplies: ["Comment payer ?", "Comment publier une annonce ?", "Je veux vendre gratuitement", "Autre question"],
+        data: plans,
+      };
     }
 
     if (intent === "how_video") {
       if (!videosEnabled) {
-        return NextResponse.json({
-          reply: {
-            intent,
-            answer:
-              "Actuellement, la publication de **vidéos** est **désactivée** sur la plateforme par l'équipe Jurgi. ⚠️\n\nVous pouvez toujours ajouter des **photos** à vos annonces. Si besoin, contactez le support pour plus d'informations.",
-            quickReplies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Contacter le support", "Autre question"],
-          },
-        });
+        return {
+          intent,
+          answer:
+            "Actuellement, la publication de **vidéos** est **désactivée** sur la plateforme par l'équipe Jurgi. ⚠️\n\nVous pouvez toujours ajouter des **photos** à vos annonces. Si besoin, contactez le support pour plus d'informations.",
+          quickReplies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Contacter le support", "Autre question"],
+        };
       }
       const plans = await prisma.plan.findMany({
         where: { isActive: true, isVisible: true },
@@ -236,14 +224,12 @@ export async function POST(request: NextRequest) {
       } else {
         answer += "Pour connaître le nombre exact de vidéos autorisé, consultez la page **Abonnements** (/abonnement).";
       }
-      return NextResponse.json({
-        reply: {
-          intent,
-          answer,
-          quickReplies: ["Combien coûte un abonnement ?", "Comment publier une annonce ?", "Trouver un vétérinaire", "Autre question"],
-          data: plans,
-        },
-      });
+      return {
+        intent,
+        answer,
+        quickReplies: ["Combien coûte un abonnement ?", "Comment publier une annonce ?", "Trouver un vétérinaire", "Autre question"],
+        data: plans,
+      };
     }
 
     if (intent === "find_listing") {
@@ -253,7 +239,7 @@ export async function POST(request: NextRequest) {
         orderBy: { createdAt: "desc" },
         take: 6,
       }).catch(() => []);
-      return NextResponse.json({ reply: buildListingAnswer(rows, question) });
+      return buildListingAnswer(rows, question);
     }
 
     if (intent === "find_vet") {
@@ -263,7 +249,7 @@ export async function POST(request: NextRequest) {
         orderBy: { createdAt: "desc" },
         take: 4,
       }).catch(() => []);
-      return NextResponse.json({ reply: buildVetAnswer(rows) });
+      return buildVetAnswer(rows);
     }
 
     if (intent === "find_transporter") {
@@ -273,16 +259,14 @@ export async function POST(request: NextRequest) {
         orderBy: { createdAt: "desc" },
         take: 4,
       }).catch(() => []);
-      return NextResponse.json({
-        reply: rows.length === 0
-          ? { intent, answer: "Je n'ai pas trouvé de transporteur correspondant en ce moment. Consultez l'annuaire **/transporteurs** ou posez une autre question.", quickReplies: ["Trouver un vétérinaire", "Comment publier ?", "Autre question"] }
-          : {
-              intent,
-              answer: `Voici des transporteurs disponibles :\n\n${rows.map((t, i) => `${i + 1}. **${t.displayName || t.user?.name}** — ${t.vehicleType || ""} ${t.zones ? "· " + (() => { try { const z = JSON.parse(t.zones); return Array.isArray(z) ? z[0]?.region || "" : ""; } catch { return ""; } })() : ""} ${t.phone ? "· 📞 " + t.phone : ""}`).join("\n")}\n\nConsultez l'annuaire **/transporteurs** pour les joindre.`,
-              quickReplies: ["Trouver un vétérinaire", "Publier une annonce", "Autre question"],
-              data: rows.slice(0, 4),
-            },
-      });
+      return rows.length === 0
+        ? { intent, answer: "Je n'ai pas trouvé de transporteur correspondant en ce moment. Consultez l'annuaire **/transporteurs** ou posez une autre question.", quickReplies: ["Trouver un vétérinaire", "Comment publier ?", "Autre question"] }
+        : {
+            intent,
+            answer: `Voici des transporteurs disponibles :\n\n${rows.map((t, i) => `${i + 1}. **${t.displayName || t.user?.name}** — ${t.vehicleType || ""} ${t.zones ? "· " + (() => { try { const z = JSON.parse(t.zones); return Array.isArray(z) ? z[0]?.region || "" : ""; } catch { return ""; } })() : ""} ${t.phone ? "· 📞 " + t.phone : ""}`).join("\n")}\n\nConsultez l'annuaire **/transporteurs** pour les joindre.`,
+            quickReplies: ["Trouver un vétérinaire", "Publier une annonce", "Autre question"],
+            data: rows.slice(0, 4),
+          };
     }
 
     if (intent === "find_livreur") {
@@ -292,16 +276,14 @@ export async function POST(request: NextRequest) {
         orderBy: { createdAt: "desc" },
         take: 4,
       }).catch(() => []);
-      return NextResponse.json({
-        reply: rows.length === 0
-          ? { intent, answer: "Je n'ai pas trouvé de livreur en ce moment. Consultez l'annuaire **/livreurs** ou posez une autre question.", quickReplies: ["Trouver un vétérinaire", "Autre question"] }
-          : {
-              intent,
-              answer: `Voici des livreurs disponibles :\n\n${rows.map((d, i) => `${i + 1}. **${d.displayName || d.user?.name}** — ${d.vehicleType || ""} ${d.phone ? "· 📞 " + d.phone : ""}`).join("\n")}\n\nConsultez l'annuaire **/livreurs** pour les joindre.`,
-              quickReplies: ["Trouver un transporteur", "Publier une annonce", "Autre question"],
-              data: rows.slice(0, 4),
-            },
-      });
+      return rows.length === 0
+        ? { intent, answer: "Je n'ai pas trouvé de livreur en ce moment. Consultez l'annuaire **/livreurs** ou posez une autre question.", quickReplies: ["Trouver un vétérinaire", "Autre question"] }
+        : {
+            intent,
+            answer: `Voici des livreurs disponibles :\n\n${rows.map((d, i) => `${i + 1}. **${d.displayName || d.user?.name}** — ${d.vehicleType || ""} ${d.phone ? "· 📞 " + d.phone : ""}`).join("\n")}\n\nConsultez l'annuaire **/livreurs** pour les joindre.`,
+            quickReplies: ["Trouver un transporteur", "Publier une annonce", "Autre question"],
+            data: rows.slice(0, 4),
+          };
     }
 
     if (intent === "find_institution") {
@@ -311,34 +293,97 @@ export async function POST(request: NextRequest) {
         orderBy: { createdAt: "desc" },
         take: 4,
       }).catch(() => []);
-      return NextResponse.json({
-        reply: rows.length === 0
-          ? { intent, answer: "Je n'ai pas trouvé d'institution en ce moment. Consultez l'annuaire **/institutions** ou posez une autre question.", quickReplies: ["Trouver un vétérinaire", "Autre question"] }
-          : {
-              intent,
-              answer: `Voici des institutions disponibles :\n\n${rows.map((ins, i) => `${i + 1}. **${ins.displayName || ins.user?.name}** — ${ins.institutionType || ""} ${ins.phone ? "· 📞 " + ins.phone : ""}`).join("\n")}\n\nConsultez l'annuaire **/institutions** pour en savoir plus.`,
-              quickReplies: ["Trouver un vétérinaire", "Publier une annonce", "Autre question"],
-              data: rows.slice(0, 4),
-            },
-      });
+      return rows.length === 0
+        ? { intent, answer: "Je n'ai pas trouvé d'institution en ce moment. Consultez l'annuaire **/institutions** ou posez une autre question.", quickReplies: ["Trouver un vétérinaire", "Autre question"] }
+        : {
+            intent,
+            answer: `Voici des institutions disponibles :\n\n${rows.map((ins, i) => `${i + 1}. **${ins.displayName || ins.user?.name}** — ${ins.institutionType || ""} ${ins.phone ? "· 📞 " + ins.phone : ""}`).join("\n")}\n\nConsultez l'annuaire **/institutions** pour en savoir plus.`,
+            quickReplies: ["Trouver un vétérinaire", "Publier une annonce", "Autre question"],
+            data: rows.slice(0, 4),
+          };
     }
 
     if (intent === "post_request") {
-      return NextResponse.json({
-        reply: {
-          intent,
-          answer:
-            "Vous pouvez poster une **demande d'achat** sur Jurgi :\n\n1. Connectez-vous à votre compte.\n2. Allez dans l'onglet **Demandes** (/demandes).\n3. Cliquez sur **\"Poster une demande\"**.\n4. Décrivez ce dont vous avez besoin (quantité, budget, région...) puis publiez.\n\nLes vendeurs de la plateforme verront votre demande et pourront vous proposer leurs produits. C'est **gratuit**.",
-          quickReplies: ["Trouver un vétérinaire", "Comment publier une annonce ?", "Autre question"],
-        },
-      });
+      return {
+        intent,
+        answer:
+          "Vous pouvez poster une **demande d'achat** sur Jurgi :\n\n1. Connectez-vous à votre compte.\n2. Allez dans l'onglet **Demandes** (/demandes).\n3. Cliquez sur **\"Poster une demande\"**.\n4. Décrivez ce dont vous avez besoin (quantité, budget, région...) puis publiez.\n\nLes vendeurs de la plateforme verront votre demande et pourront vous proposer leurs produits. C'est **gratuit**.",
+        quickReplies: ["Trouver un vétérinaire", "Comment publier une annonce ?", "Autre question"],
+      };
     }
 
-    return NextResponse.json({ reply: { intent: "fallback", ...faqAnswer("fallback") } });
+    return { intent: "fallback", ...faqAnswer("fallback") };
+}
+
+export async function POST(request: NextRequest) {
+  let sessionId = "";
+  try {
+    const body = await request.json();
+    const question: string = String(body.question || "").trim();
+    sessionId = String(body.sessionId || "unknown");
+    if (!question) {
+      return NextResponse.json({ error: "Question vide" }, { status: 400 });
+    }
+
+    let userId: string | null = null;
+    let region: string | null = null;
+    try {
+      const { getServerSession } = await import("next-auth");
+      const { authOptions } = await import("@/lib/auth");
+      const session = await getServerSession(authOptions);
+      const sid = (session?.user as any)?.id;
+      if (sid) {
+        userId = sid;
+        const u = await prisma.user.findUnique({ where: { id: sid }, select: { region: true } }).catch(() => null);
+        region = u?.region || null;
+      }
+    } catch {
+      // session indéterminée — on log sans utilisateur
+    }
+
+    const reply = await resolveAssistant(question, { sessionId, userId });
+
+    const answered =
+      reply.intent !== "fallback" &&
+      reply.intent !== "error";
+
+    try {
+      await prisma.secretaryLog.create({
+        data: {
+          sessionId,
+          userId,
+          question,
+          intent: reply.intent,
+          answer: reply.answer,
+          answered,
+          region,
+        },
+      });
+    } catch {
+      // ne jamais faire échouer la réponse à cause du logging
+    }
+
+    return NextResponse.json({ reply });
   } catch (e) {
-    return NextResponse.json(
-      { reply: { intent: "error", answer: "Une erreur est survenue. Veuillez réessayer dans un instant. 🙏", quickReplies: ["Comment publier une annonce ?", "Contacter le support"] } },
-      { status: 200 }
-    );
+    const fallbackReply = {
+      intent: "error",
+      answer: "Une erreur est survenue. Veuillez réessayer dans un instant. 🙏",
+      quickReplies: ["Comment publier une annonce ?", "Contacter le support"],
+    };
+    try {
+      await prisma.secretaryLog.create({
+        data: {
+          sessionId,
+          userId: null,
+          question: "erreur",
+          intent: "error",
+          answer: fallbackReply.answer,
+          answered: false,
+        },
+      });
+    } catch {
+      // ignore
+    }
+    return NextResponse.json({ reply: fallbackReply }, { status: 200 });
   }
 }
