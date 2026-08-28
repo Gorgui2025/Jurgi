@@ -75,6 +75,10 @@ export default function RootLayout({
             }),
           }}
         />
+        <meta
+          name="google-site-verification"
+          content="iHL9j5nBuisxT-HEyVmUi2wU0Bf8J73BKVZwjF1Q7xE"
+        />
       </head>
       <body className="min-h-screen flex flex-col">
         <Providers>
