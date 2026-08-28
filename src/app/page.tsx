@@ -232,6 +232,50 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <section className="bg-white border-t border-beigebrume-200">
+        <div className="page-container">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div>
+              <h2 className="section-title mb-3">Acheter et vendre du bétail au Sénégal</h2>
+              <p className="text-sm text-charbon-300 leading-relaxed">
+                Jurgi connecte les éleveurs du Sénégal : achetez et vendez des bovins, ovins, caprins,
+                volailles et autres animaux d&apos;élevage en toute simplicité. Publiez gratuitement vos
+                annonces de bétail, fixez votre prix en FCFA et recevez directement les demandes des
+                acheteurs de votre région (Dakar, Thiès, Kaolack, Saint-Louis, Diourbel, Kolda…).
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-charbon-500 mb-3">Vendre son élevage en ligne</h3>
+              <ul className="space-y-2 text-sm text-charbon-300">
+                <li>• Publier une annonce d&apos;animal (veau, taureau, mouton, chèvre, poulet…)</li>
+                <li>• Ajouter photos et vidéos pour rassurer les acheteurs</li>
+                <li>• Vendre des aliments, provende et fourrage</li>
+                <li>• Proposer des équipements et matériel d&apos;élevage</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-charbon-500 mb-3">Trouver un professionnel</h3>
+              <ul className="space-y-2 text-sm text-charbon-300">
+                <li>• <Link href="/veterinaires" className="text-baobab-500 hover:underline">Vétérinaires</Link> pour la santé animale</li>
+                <li>• <Link href="/transporteurs" className="text-baobab-500 hover:underline">Transporteurs de bétail</Link> entre les régions</li>
+                <li>• <Link href="/livreurs" className="text-baobab-500 hover:underline">Livreurs</Link> pour le transport local</li>
+                <li>• <Link href="/institutions" className="text-baobab-500 hover:underline">Institutions</Link> et partenaires de l&apos;élevage</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-charbon-500 mb-3">Un écosystème complet</h3>
+              <p className="text-sm text-charbon-300 leading-relaxed">
+                Alimentation, santé animale, <Link href="/formation" className="text-baobab-500 hover:underline">formations</Link>,
+                transport, équipements et débouchés : retrouvez tous les services qui font réussir
+                votre <Link href="/abonnement" className="text-baobab-500 hover:underline">exploitation d&apos;élevage</Link>.
+                Répondez aux <Link href="/demandes" className="text-baobab-500 hover:underline">demandes d&apos;achat</Link> et développez
+                votre activité au Sénégal.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
