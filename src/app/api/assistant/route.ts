@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-const PAYMENT_PHONE = "+221 77 981 95 88";
+const DEFAULT_PAYMENT_PHONE = "+221 77 981 95 88";
 
 interface AssistantReply {
   intent: string;
@@ -39,7 +39,7 @@ function findIntent(q: string): string {
   return "fallback";
 }
 
-function faqAnswer(intent: string): { answer: string; replies: string[] } {
+function faqAnswer(intent: string, phone: string = DEFAULT_PAYMENT_PHONE): { answer: string; replies: string[] } {
   const replies = [
     "Comment publier une annonce ?",
     "Comment payer mon abonnement ?",
@@ -80,7 +80,7 @@ function faqAnswer(intent: string): { answer: string; replies: string[] } {
     case "contact":
       return {
         answer:
-          "Vous pouvez nous joindre par le formulaire de la page **Contact** sur le site, en écrivant un message que notre équipe lira.\n\n📞 **Paiements (Mobile Money)** : **+221 77 981 95 88**\n\nNotre équipe support vous répondra rapidement pour toute question, remarque ou problème rencontré.",
+          "Vous pouvez nous joindre par le formulaire de la page **Contact** sur le site, en écrivant un message que notre équipe lira.\n\n📞 **Paiements (Mobile Money)** : **" + phone + "**\n\nNotre équipe support vous répondra rapidement pour toute question, remarque ou problème rencontré.",
         replies: ["Comment payer mon abonnement ?", "Comment publier une annonce ?", "Autre question"],
     };
     default:
@@ -135,6 +135,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Question vide" }, { status: 400 });
     }
 
+    const configs = await prisma.siteConfig.findMany().catch(() => []);
+    const getConfig = (key: string, fallback: string): string => {
+      const found = configs.find((c) => c.key === key);
+      return found ? found.value : fallback;
+    };
+    const paymentPhone = getConfig("payment_phone_number", DEFAULT_PAYMENT_PHONE) || DEFAULT_PAYMENT_PHONE;
+    const videosEnabled = getConfig("videos_enabled", "true") !== "false";
+
     const intent = findIntent(question);
 
     if (intent === "greeting") {
@@ -149,7 +157,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (intent === "how_publish" || intent === "how_register" || intent === "how_login" || intent === "about" || intent === "contact") {
-      return NextResponse.json({ reply: { intent, ...faqAnswer(intent) } });
+      return NextResponse.json({ reply: { intent, ...faqAnswer(intent, paymentPhone) } });
     }
 
     if (intent === "payment") {
@@ -159,7 +167,7 @@ export async function POST(request: NextRequest) {
         reply: {
           intent,
           answer:
-            "Pour payer votre abonnement Jurgi :\n\n1. Rendez-vous dans votre espace et choisissez votre **formule** (page Abonnements).\n2. Effectuez le paiement **Mobile Money** (Wave / Orange Money) vers :\n   **📞 +221 77 981 95 88**\n3. Envoyez-nous votre **preuve de paiement** : notre équipe valide et active votre compte (vous recevez un **code d'activation**).\n\nConcernant le **profil livreur** : l'abonnement est à " + livreurMsg + ".\n\n💡 Le paiement est validé par notre équipe, généralement sous quelques heures.",
+            "Pour payer votre abonnement Jurgi :\n\n1. Rendez-vous dans votre espace et choisissez votre **formule** (page Abonnements).\n2. Effectuez le paiement **Mobile Money** (Wave / Orange Money) vers :\n   **📞 " + paymentPhone + "**\n3. Envoyez-nous votre **preuve de paiement** : notre équipe valide et active votre compte (vous recevez un **code d'activation**).\n\nConcernant le **profil livreur** : l'abonnement est à " + livreurMsg + ".\n\n💡 Le paiement est validé par notre équipe, généralement sous quelques heures.",
           quickReplies: ["Combien coûtent les abonnements ?", "Comment publier ?", "Puis-je vendre gratuitement ?", "Autre question"],
         },
       });
@@ -174,12 +182,12 @@ export async function POST(request: NextRequest) {
       let answer =
         "Voici les formules d'abonnement Jurgi :\n\n";
       if (plans.length === 0) {
-        answer += "Les détails des formules sont disponibles sur la page **Abonnements** (/abonnement). L'inscription de base et la publication d'annonces peuvent être gratuites selon votre plan.\n\nVous pouvez aussi payer via **Mobile Money** : 📞 **+221 77 981 95 88**.";
+        answer += "Les détails des formules sont disponibles sur la page **Abonnements** (/abonnement). L'inscription de base et la publication d'annonces peuvent être gratuites selon votre plan.\n\nVous pouvez aussi payer via **Mobile Money** : 📞 **" + paymentPhone + "**.";
       } else {
         answer += plans
           .map((p) => `• **${p.name}** — ${p.price.toLocaleString("fr-FR")} FCFA / ${p.durationDays} j${p.isTrialEligible ? " (essai gratuit possible)" : ""}${p.description ? " — " + p.description : ""}`)
           .join("\n");
-        answer += "\n\nVous pouvez payer via **Mobile Money** : 📞 **+221 77 981 95 88**.";
+        answer += "\n\nVous pouvez payer via **Mobile Money** : 📞 **" + paymentPhone + "**.";
       }
       return NextResponse.json({
         reply: {
@@ -192,6 +200,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (intent === "how_video") {
+      if (!videosEnabled) {
+        return NextResponse.json({
+          reply: {
+            intent,
+            answer:
+              "Actuellement, la publication de **vidéos** est **désactivée** sur la plateforme par l'équipe Jurgi. ⚠️\n\nVous pouvez toujours ajouter des **photos** à vos annonces. Si besoin, contactez le support pour plus d'informations.",
+            quickReplies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Contacter le support", "Autre question"],
+          },
+        });
+      }
       const plans = await prisma.plan.findMany({
         where: { isActive: true, isVisible: true },
         orderBy: { sortOrder: "asc" },
