@@ -21,8 +21,6 @@ import {
   ChevronDown,
   Crown,
   Truck,
-  Stethoscope,
-  Building2,
 } from "lucide-react";
 
 const NAV_LINKS = [

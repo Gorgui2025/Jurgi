@@ -13,6 +13,7 @@ import {
   X,
   Shield,
   Clock,
+  Star,
 } from "lucide-react";
 import OnlineBadge from "@/components/OnlineBadge";
 
@@ -69,6 +70,8 @@ interface TransporterProfile {
   isVerified: boolean;
   lastSeen: string | null;
   user?: { lastSeen?: string | null };
+  rating: number | null;
+  reviewCount: number;
 }
 
 function getInitials(name: string | null) {
@@ -410,6 +413,29 @@ function TransporteursContent() {
                         </span>
                       )}
                     </div>
+
+                    {profile.rating != null && profile.reviewCount > 0 && (
+                      <div className="flex items-center gap-1 mt-1.5">
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={`w-3 h-3 ${
+                                s <= Math.round(profile.rating!)
+                                  ? "text-ocre-500 fill-ocre-500"
+                                  : "text-charbon-200"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs font-semibold text-charbon-500">
+                          {Number(profile.rating).toFixed(1)}
+                        </span>
+                        <span className="text-[11px] text-charbon-300">
+                          ({profile.reviewCount} avis)
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

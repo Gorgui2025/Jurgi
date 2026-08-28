@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const drivers = await prisma.deliveryProfile.findMany({
-      include: { user: { select: { id: true, name: true, email: true, phone: true } } },
+      include: { user: { select: { id: true, name: true, email: true, phone: true, isVerified: true } } },
       orderBy: { createdAt: "desc" },
     });
 
@@ -13,6 +13,7 @@ export async function GET() {
       name: d.user?.name || "—",
       email: d.user?.email || "—",
       phone: d.user?.phone || d.phone || "—",
+      isVerified: d.user?.isVerified || false,
       vehicleType: d.vehicleType || "—",
       zones: (() => { try { return JSON.parse(d.zones || "[]"); } catch { return []; } })(),
       status: d.status,
@@ -126,6 +127,17 @@ export async function PATCH(request: NextRequest) {
             message: "Votre profil livreur a été réactivé par un administrateur.",
             data: JSON.stringify({ driverId }),
           },
+        });
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    if ((action === "verify" || action === "unverify") && driverId) {
+      const profile = await prisma.deliveryProfile.findUnique({ where: { id: driverId }, select: { userId: true } });
+      if (profile) {
+        await prisma.user.update({
+          where: { id: profile.userId },
+          data: action === "verify" ? { isVerified: true, verifiedLevel: "professional" } : { isVerified: false, verifiedLevel: "none" },
         });
       }
       return NextResponse.json({ success: true });

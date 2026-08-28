@@ -3,6 +3,15 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const userId = searchParams.get("userId");
+  if (userId) {
+    const profile = await prisma.vetProfile.findUnique({
+      where: { userId },
+      include: { user: { select: { id: true, name: true, avatar: true, isVerified: true, lastSeen: true } } },
+    });
+    return NextResponse.json(profile);
+  }
+
   const region = searchParams.get("region");
   const commune = searchParams.get("commune");
   const search = searchParams.get("q");
@@ -39,7 +48,28 @@ export async function GET(request: NextRequest) {
     prisma.vetProfile.count({ where: searchWhere }),
   ]);
 
-  return NextResponse.json({ profiles, total, page, pages: Math.ceil(total / limit) });
+  const userIds = profiles.map((p) => p.userId).filter(Boolean);
+  const reviewAggs = userIds.length
+    ? await prisma.review.groupBy({
+        by: ["userId"],
+        where: { userId: { in: userIds } },
+        _avg: { rating: true },
+        _count: { rating: true },
+      })
+    : [];
+
+  const reviewMap = new Map<string, { avg: number; count: number }>();
+  for (const agg of reviewAggs) {
+    reviewMap.set(agg.userId, { avg: Number(agg._avg.rating || 0), count: agg._count.rating });
+  }
+
+  const enriched = profiles.map((p) => ({
+    ...p,
+    rating: reviewMap.get(p.userId)?.avg ?? null,
+    reviewCount: reviewMap.get(p.userId)?.count ?? 0,
+  }));
+
+  return NextResponse.json({ profiles: enriched, total, page, pages: Math.ceil(total / limit) });
 }
 
 export async function POST(request: NextRequest) {

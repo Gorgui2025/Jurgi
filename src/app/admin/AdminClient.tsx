@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import DeliveryDriversTab from "./DeliveryDriversTab";
 import ProfessionalsTab from "./ProfessionalsTab";
 import RequestsTab from "./RequestsTab";
+import FinanceTab from "./FinanceTab";
+import MessagesTab from "./MessagesTab";
 import {
   Users, FileText, Flag, BarChart3, Settings, Shield, CheckCircle, XCircle,
   Ban, AlertTriangle, Clock, Globe, Mail, Phone, ShieldCheck, Key, LogOut,
@@ -1345,18 +1347,6 @@ function SubscriptionsTab({ admin }: { admin: AdminUser }) {
 }
 
 /* ────── PLACEHOLDER ────── */
-function PlaceholderTab({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="card p-8 text-center">
-      <div className="w-16 h-16 bg-beigebrume-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-        <Clock className="w-8 h-8 text-charbon-200" />
-      </div>
-      <h3 className="font-semibold text-charbon-500 mb-2">{title}</h3>
-      <p className="text-sm text-charbon-300">{desc}</p>
-    </div>
-  );
-}
-
 /* ────── MAIN PAGE ────── */
 export default function AdminPage({ admin: serverAdmin }: { admin: { id: string; email: string; name: string; role: string } }) {
   const router = useRouter();
@@ -1513,8 +1503,8 @@ export default function AdminPage({ admin: serverAdmin }: { admin: { id: string;
           {activeTab === "requests" && <RequestsTab />}
           {activeTab === "professionals" && <ProfessionalsTab onAction={fetchNotifications} />}
           {activeTab === "deliveryDrivers" && <DeliveryDriversTab onAction={fetchNotifications} />}
-          {activeTab === "messages" && <PlaceholderTab title="Messages signalés" desc="Conversations nécessitant une intervention" />}
-          {activeTab === "finance" && <PlaceholderTab title="Centre financier" desc="Paiement automatique non activé" />}
+          {activeTab === "messages" && <MessagesTab />}
+          {activeTab === "finance" && <FinanceTab />}
         </div>
       </div>
     </div>

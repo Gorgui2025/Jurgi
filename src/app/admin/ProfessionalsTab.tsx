@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Stethoscope, Truck, Building2, Search, CheckCircle, XCircle, Clock, AlertTriangle, RotateCcw, MapPin } from "lucide-react";
+import { Stethoscope, Truck, Building2, Search, CheckCircle, XCircle, Clock, AlertTriangle, RotateCcw, MapPin, Shield, ShieldOff } from "lucide-react";
 
 interface ProfessionalProfile {
   id: string;
@@ -9,6 +9,7 @@ interface ProfessionalProfile {
   displayName: string | null;
   phone: string | null;
   email: string | null;
+  isVerified: boolean;
   vehicleType?: string;
   institutionType?: string;
   zones: string;
@@ -87,7 +88,7 @@ export default function ProfessionalsTab({ onAction }: { onAction?: () => void }
   });
 
   const handleAction = async (profileType: string, profileId: string, action: string) => {
-    const labels: Record<string, string> = { approve: "approuver", reject: "rejeter", suspend: "suspendre", reactivate: "réactiver" };
+    const labels: Record<string, string> = { approve: "approuver", reject: "rejeter", suspend: "suspendre", reactivate: "réactiver", verify: "vérifier", unverify: "ne plus vérifier" };
     if (action === "reject" && !confirm(`Refuser ce profil ? Le compte sera rejeté.`)) return;
 
     await fetch("/api/admin/professionals", {
@@ -99,11 +100,15 @@ export default function ProfessionalsTab({ onAction }: { onAction?: () => void }
     if (action === "reject") {
       setProfiles(prev => prev.filter(p => p.id !== profileId));
     } else if (action === "approve") {
-      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, status: "trial", isActive: true } : p));
+      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, status: "active", isActive: true, isVerified: true } : p));
     } else if (action === "suspend") {
       setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, status: "suspended", isActive: false } : p));
     } else if (action === "reactivate") {
-      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, status: "trial", isActive: true } : p));
+      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, status: "active", isActive: true } : p));
+    } else if (action === "verify") {
+      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, isVerified: true } : p));
+    } else if (action === "unverify") {
+      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, isVerified: false } : p));
     }
 
     if (onAction) onAction();
@@ -218,6 +223,11 @@ export default function ProfessionalsTab({ onAction }: { onAction?: () => void }
                        prof.status === "active" ? "Actif" :
                        prof.status === "suspended" ? "Suspendu" : prof.status}
                     </span>
+                    {prof.isVerified && (
+                      <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-vertbrume-100 text-baobab-600">
+                        <Shield className="w-3 h-3" /> Vérifié
+                      </span>
+                    )}
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1">
@@ -238,10 +248,23 @@ export default function ProfessionalsTab({ onAction }: { onAction?: () => void }
                           <RotateCcw className="w-3.5 h-3.5" />
                         </button>
                       ) : prof.status !== "inactive" ? (
-                        <button onClick={() => handleAction(prof.profileType, prof.id, "suspend")}
-                          className="text-xs text-rougeterre-500 hover:text-rougeterre-600 p-1 rounded-lg hover:bg-rougeterre-50" title="Suspendre">
-                          <XCircle className="w-3.5 h-3.5" />
-                        </button>
+                        <>
+                          <button onClick={() => handleAction(prof.profileType, prof.id, "suspend")}
+                            className="text-xs text-rougeterre-500 hover:text-rougeterre-600 p-1 rounded-lg hover:bg-rougeterre-50" title="Suspendre">
+                            <XCircle className="w-3.5 h-3.5" />
+                          </button>
+                          {prof.isVerified ? (
+                            <button onClick={() => handleAction(prof.profileType, prof.id, "unverify")}
+                              className="text-xs text-charbon-400 hover:text-charbon-600 p-1 rounded-lg hover:bg-charbon-50" title="Ne plus vérifier">
+                              <ShieldOff className="w-3.5 h-3.5" />
+                            </button>
+                          ) : (
+                            <button onClick={() => handleAction(prof.profileType, prof.id, "verify")}
+                              className="text-xs text-baobab-500 hover:text-baobab-600 p-1 rounded-lg hover:bg-vertbrume-50" title="Vérifier">
+                              <Shield className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </>
                       ) : null}
                     </div>
                   </td>

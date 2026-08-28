@@ -7,6 +7,7 @@ interface ProfileEntry {
   displayName: string | null;
   phone: string | null;
   email: string | null;
+  isVerified: boolean;
   vehicleType?: string;
   institutionType?: string;
   zones: string;
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
     if (status) where.status = status;
     const profiles = await prisma.vetProfile.findMany({
       where,
-      include: { user: { select: { id: true, name: true, email: true, phone: true } } },
+      include: { user: { select: { id: true, name: true, email: true, phone: true, isVerified: true } } },
       orderBy: { createdAt: "desc" },
     });
     profiles.forEach(p => {
@@ -47,6 +48,7 @@ export async function GET(request: NextRequest) {
         displayName: p.displayName || p.user.name,
         phone: p.phone || p.user.phone,
         email: p.user.email,
+        isVerified: p.user.isVerified,
         zones: p.zones,
         status: p.status,
         isActive: p.isActive,
@@ -61,7 +63,7 @@ export async function GET(request: NextRequest) {
     if (status) where.status = status;
     const profiles = await prisma.transporterProfile.findMany({
       where,
-      include: { user: { select: { id: true, name: true, email: true, phone: true } } },
+      include: { user: { select: { id: true, name: true, email: true, phone: true, isVerified: true } } },
       orderBy: { createdAt: "desc" },
     });
     profiles.forEach(p => {
@@ -71,6 +73,7 @@ export async function GET(request: NextRequest) {
         displayName: p.displayName || p.user.name,
         phone: p.phone || p.user.phone,
         email: p.user.email,
+        isVerified: p.user.isVerified,
         vehicleType: p.vehicleType,
         zones: p.zones,
         status: p.status,
@@ -86,7 +89,7 @@ export async function GET(request: NextRequest) {
     if (status) where.status = status;
     const profiles = await prisma.institutionProfile.findMany({
       where,
-      include: { user: { select: { id: true, name: true, email: true, phone: true } } },
+      include: { user: { select: { id: true, name: true, email: true, phone: true, isVerified: true } } },
       orderBy: { createdAt: "desc" },
     });
     profiles.forEach(p => {
@@ -96,6 +99,7 @@ export async function GET(request: NextRequest) {
         displayName: p.displayName || p.user.name,
         phone: p.phone || p.user.phone,
         email: p.user.email,
+        isVerified: p.user.isVerified,
         institutionType: p.institutionType,
         zones: p.zones,
         status: p.status,
@@ -154,7 +158,7 @@ async function handleAction(
   switch (action) {
     case "approve": {
       await model.update({ where: { id: profileId }, data: { status: "active", isActive: true } });
-      await prisma.user.update({ where: { id: profile.userId }, data: { accountStatus: "active" } });
+      await prisma.user.update({ where: { id: profile.userId }, data: { accountStatus: "active", isVerified: true, verifiedLevel: "professional" } });
       await prisma.adminNotification.create({
         data: {
           type: "professional_approved",
@@ -200,6 +204,14 @@ async function handleAction(
           message: `Votre compte ${ROLE_LABELS[profileType] || profileType} a été réactivé.`,
         },
       });
+      break;
+    }
+    case "verify": {
+      await prisma.user.update({ where: { id: profile.userId }, data: { isVerified: true, verifiedLevel: "professional" } });
+      break;
+    }
+    case "unverify": {
+      await prisma.user.update({ where: { id: profile.userId }, data: { isVerified: false, verifiedLevel: "none" } });
       break;
     }
   }

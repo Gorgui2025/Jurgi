@@ -54,7 +54,8 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ profiles, total, page, pages: Math.ceil(total / limit) });
+    const enriched = await attachReviews(profiles);
+    return NextResponse.json({ profiles: enriched, total, page, pages: Math.ceil(total / limit) });
   }
 
   const [profiles, total] = await Promise.all([
@@ -70,7 +71,29 @@ export async function GET(request: NextRequest) {
     prisma.deliveryProfile.count({ where }),
   ]);
 
-  return NextResponse.json({ profiles, total, page, pages: Math.ceil(total / limit) });
+  const enriched = await attachReviews(profiles);
+  return NextResponse.json({ profiles: enriched, total, page, pages: Math.ceil(total / limit) });
+}
+
+async function attachReviews(profiles: { userId: string }[]) {
+  const userIds = profiles.map((p) => p.userId).filter(Boolean);
+  const algs = userIds.length
+    ? await prisma.review.groupBy({
+        by: ["userId"],
+        where: { userId: { in: userIds } },
+        _avg: { rating: true },
+        _count: { rating: true },
+      })
+    : [];
+  const reviewMap = new Map<string, { avg: number; count: number }>();
+  for (const agg of algs) {
+    reviewMap.set(agg.userId, { avg: Number(agg._avg.rating || 0), count: agg._count.rating });
+  }
+  return profiles.map((p) => ({
+    ...p,
+    rating: reviewMap.get(p.userId)?.avg ?? null,
+    reviewCount: reviewMap.get(p.userId)?.count ?? 0,
+  }));
 }
 
 export async function POST(request: NextRequest) {

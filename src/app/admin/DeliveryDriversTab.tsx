@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Truck, Search, CheckCircle, XCircle, Clock, AlertTriangle, Eye, RotateCcw, Phone, MapPin } from "lucide-react";
+import { Truck, Search, CheckCircle, XCircle, Clock, AlertTriangle, Eye, RotateCcw, Phone, MapPin, Shield, ShieldOff } from "lucide-react";
 
 interface DeliveryDriver {
   id: string;
   name: string;
   email: string;
   phone: string;
+  isVerified: boolean;
   vehicleType: string;
   zones: string[];
   status: string;
@@ -94,6 +95,18 @@ export default function DeliveryDriversTab({ onAction }: { onAction?: () => void
     });
     const data = await res.json();
     setDrivers(prev => prev.map(d => d.id === driverId ? { ...d, status: "trial", isActive: true, trialEndsAt: data.trialEndsAt } : d));
+    if (onAction) onAction();
+  };
+
+  const handleVerify = async (driverId: string) => {
+    const driver = drivers.find(d => d.id === driverId);
+    const action = driver?.isVerified ? "unverify" : "verify";
+    await fetch("/api/admin/delivery-drivers", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ driverId, action }),
+    });
+    setDrivers(prev => prev.map(d => d.id === driverId ? { ...d, isVerified: action === "verify" } : d));
     if (onAction) onAction();
   };
 
@@ -258,6 +271,11 @@ export default function DeliveryDriversTab({ onAction }: { onAction?: () => void
                          <AlertTriangle className="w-3 h-3" />}
                         {driver.status === "pending" ? "En attente" : driver.status}
                       </span>
+                      {driver.isVerified && (
+                        <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-vertbrume-100 text-baobab-600">
+                          <Shield className="w-3 h-3" /> Vérifié
+                        </span>
+                      )}
                     </td>
                     <td className="p-3">
                       <div className="flex items-center gap-1">
@@ -283,6 +301,17 @@ export default function DeliveryDriversTab({ onAction }: { onAction?: () => void
                             <XCircle className="w-3.5 h-3.5" />
                           </button>
                         ) : null}
+                        {driver.isVerified ? (
+                          <button onClick={() => handleVerify(driver.id)}
+                            className="text-xs text-charbon-400 hover:text-charbon-600 p-1 rounded-lg hover:bg-charbon-50" title="Ne plus vérifier">
+                            <ShieldOff className="w-3.5 h-3.5" />
+                          </button>
+                        ) : (
+                          <button onClick={() => handleVerify(driver.id)}
+                            className="text-xs text-baobab-500 hover:text-baobab-600 p-1 rounded-lg hover:bg-vertbrume-50" title="Vérifier">
+                            <Shield className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <a href={`/livreurs/${driver.id}`} target="_blank" rel="noopener noreferrer"
                           className="text-xs text-baobab-500 hover:text-baobab-600 p-1 rounded-lg hover:bg-baobab-50">
                           <Eye className="w-3.5 h-3.5" />
