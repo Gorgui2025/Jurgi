@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, X, Loader2 } from "lucide-react";
+import { Send, X, Loader2, Star } from "lucide-react";
 import SecretaryAvatar from "./SecretaryAvatar";
 
 const SECRETARY_NAME = "Siny";
@@ -60,7 +60,6 @@ export default function AssistantWidget() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [userCount, setUserCount] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [feedbackRating, setFeedbackRating] = useState(0);
@@ -86,7 +85,6 @@ export default function AssistantWidget() {
     if (!trimmed || loading) return;
     setInput("");
     setMessages((prev) => [...prev, { role: "user", text: trimmed }]);
-    setUserCount((c) => c + 1);
     setLoading(true);
     setShowFeedback(false);
     try {
@@ -104,10 +102,6 @@ export default function AssistantWidget() {
       setMessages((prev) => [...prev, { role: "assistant", text: "Une erreur est survenue. Veuillez réessayer. 🙏" }]);
     } finally {
       setLoading(false);
-      const next = userCount + 1;
-      if (next >= 3 && !feedbackSent && sessionId) {
-        setTimeout(() => setShowFeedback(true), 600);
-      }
     }
   };
 
@@ -123,6 +117,13 @@ export default function AssistantWidget() {
     } catch {
       // ignore
     }
+  };
+
+  const openFeedback = () => {
+    setFeedbackComment("");
+    setFeedbackRating(0);
+    setFeedbackSent(false);
+    setShowFeedback(true);
   };
 
   return (
@@ -219,6 +220,22 @@ export default function AssistantWidget() {
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="border-t border-beigebrume-200 bg-beigebrume-50/50 flex items-center justify-between px-3 py-1.5">
+            <button
+              onClick={openFeedback}
+              disabled={feedbackSent}
+              className={`flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full font-medium transition ${
+                feedbackSent
+                  ? "text-charbon-300 cursor-default"
+                  : "text-ocre-600 hover:bg-ocre-100 bg-white border border-beigebrume-200"
+              }`}
+            >
+              <Star className={`w-3.5 h-3.5 ${feedbackSent ? "text-charbon-300" : "text-ocre-500"}`} />
+              {feedbackSent ? "Merci pour votre avis !" : "Évaluer Siny"}
+            </button>
+            <span className="text-[10px] text-charbon-300">Secrétariat virtuel</span>
           </div>
 
           <form
