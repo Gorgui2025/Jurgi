@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, Loader2 } from "lucide-react";
+import { Send, X, Loader2 } from "lucide-react";
+import SecretaryAvatar from "./SecretaryAvatar";
+
+const SECRETARY_NAME = "Siny";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -50,7 +53,7 @@ export default function AssistantWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      text: "Bonjour ! 👋 Je suis le secrétariat Jurgi. Comment puis-je vous aider ?",
+      text: `Bonjour ! 👋 Je suis ${SECRETARY_NAME}, le secrétariat Jurgi. Comment puis-je vous aider ?`,
       quickReplies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Combien coûte un abonnement ?", "Comment payer ?"],
     },
   ]);
@@ -91,12 +94,12 @@ export default function AssistantWidget() {
       {open && (
         <div className="fixed bottom-4 right-4 z-50 w-[calc(100vw-2rem)] max-w-sm bg-white rounded-2xl shadow-2xl border border-beigebrume-200 flex flex-col overflow-hidden" style={{ height: "min(70vh, 560px)" }}>
           <div className="bg-gradient-to-r from-baobab-500 to-vertprofond-500 text-white px-4 py-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-              <Bot className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-full bg-white/25 flex items-center justify-center shrink-0 p-0.5">
+              <SecretaryAvatar size={36} />
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-sm">Secrétariat Jurgi</p>
-              <p className="text-[11px] text-baobab-100">Répond en direct • 24/7</p>
+              <p className="font-semibold text-sm">Siny · Secrétariat Jurgi</p>
+              <p className="text-[11px] text-baobab-100">En ligne • répond en direct 24/7</p>
             </div>
             <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-white/20">
               <X className="w-5 h-5" />
@@ -110,8 +113,11 @@ export default function AssistantWidget() {
                   <div className="bg-baobab-500 text-white rounded-2xl rounded-br-sm px-3.5 py-2 max-w-[85%] text-sm whitespace-pre-wrap">{m.text}</div>
                 </div>
               ) : (
-                <div key={i} className="flex justify-start">
-                  <div className="bg-white rounded-2xl rounded-bl-sm px-3.5 py-2 max-w-[85%] text-sm text-charbon-500 shadow-sm">
+                <div key={i} className="flex items-start gap-2">
+                  <div className="w-7 h-7 rounded-full bg-white border border-beigebrume-200 flex items-center justify-center shrink-0 p-0.5 mt-0.5">
+                    <SecretaryAvatar size={26} />
+                  </div>
+                  <div className="bg-white rounded-2xl rounded-bl-sm px-3.5 py-2 max-w-[78%] text-sm text-charbon-500 shadow-sm">
                     <div className="space-y-1">{renderText(m.text)}</div>
                     {m.quickReplies && m.quickReplies.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
@@ -131,7 +137,10 @@ export default function AssistantWidget() {
               )
             )}
             {loading && (
-              <div className="flex justify-start">
+              <div className="flex items-start gap-2">
+                <div className="w-7 h-7 rounded-full bg-white border border-beigebrume-200 flex items-center justify-center shrink-0 p-0.5 mt-0.5">
+                  <SecretaryAvatar size={26} />
+                </div>
                 <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm flex items-center gap-2">
                   <Loader2 className="w-4 h-4 text-baobab-500 animate-spin" />
                   <span className="text-xs text-charbon-300">Je réfléchis...</span>
@@ -162,7 +171,7 @@ export default function AssistantWidget() {
           onClick={() => setOpen(true)}
           className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-full bg-baobab-500 text-white shadow-lg hover:bg-baobab-600 transition-colors"
         >
-          <Bot className="w-5 h-5" />
+          <SecretaryAvatar size={26} />
           <span className="text-sm font-medium">Besoin d&apos;aide ?</span>
         </button>
       )}
