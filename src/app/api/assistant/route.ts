@@ -21,6 +21,7 @@ function hasAny(text: string, words: string[]): boolean {
 
 function findIntent(q: string): string {
   if (hasAny(q, ["bonjour", "salut", "hello", "bonsoir", "coucou", "bjr", "slt"])) return "greeting";
+  if (hasAny(q, ["video", "vidéo", "filmer", "video sur mon annonce", "publier des videos", "mettre une video", "envoyer une video", "telecharger une video"])) return "how_video";
   if (hasAny(q, ["publier", "annonce", "mettre en vente", "vendre", "vendre mon", "create", "ajouter une annonce", "afficher mon produit"])) return "how_publish";
   if (hasAny(q, ["paiement", "payer", "payer mon abonnement", "mobile money", "wave", "orange money", "paiement wave", "transition", "activer mon compte", "code d'activation", "abonnement"])) return "payment";
   if (hasAny(q, ["prix", "abonnement", "plan", "forfait", "combien coute", "tarif", "formule", "inscription gratuite", "gratuit"])) return "plans";
@@ -46,6 +47,12 @@ function faqAnswer(intent: string): { answer: string; replies: string[] } {
     "Combien coûte un abonnement ?",
   ];
   switch (intent) {
+    case "how_video":
+      return {
+        answer:
+          "Oui, vous pouvez **publier des vidéos** sur vos annonces Jurgi ! 🎬\n\n1. Pendant la publication (ou en modifiant une annonce), ajoutez vos **vidéos** (au format MP4) dans la section média.\n2. Référez-vous au **nombre de vidéos** autorisé selon votre formule (voir les abonnements).\n3. Vos acheteurs pourront voir la vidéo directement sur votre annonce.\n\n💡 Le nombre de vidéos et la taille max varient selon votre **abonnement** : consultez la page Abonnements pour connaître votre plafond exact.",
+        replies: ["Trouver un vétérinaire", "Comment publier une annonce ?", "Combien coûte un abonnement ?", "Comment payer ?"],
+      };
     case "how_publish":
       return {
         answer:
@@ -67,7 +74,7 @@ function faqAnswer(intent: string): { answer: string; replies: string[] } {
     case "about":
       return {
         answer:
-          "**Jurgi** est la plateforme numérique qui connecte tous les acteurs de l'élevage au Sénégal : éleveurs, vendeurs, vétérinaires, transporteurs, institutions et acheteurs.\n\nEn un seul endroit vous pouvez :\n• 🐑 Acheter / vendre des animaux et produits (marketplace)\n• 🔬 Trouver des vétérinaires et services\n• 🚚 Connector des transporteurs et livreurs\n• 📢 Poster ou consulter des demandes d'achat\n\nNotre mission : centraliser l'offre, faciliter la mise en relation et soutenir la digitalisation progressive du secteur.",
+          "**Jurgi** est la plateforme numérique qui connecte tous les acteurs de l'élevage au Sénégal : éleveurs, vendeurs, vétérinaires, transporteurs, institutions et acheteurs.\n\nEn un seul endroit vous pouvez :\n• 🐑 Acheter / vendre des animaux et produits (marketplace)\n• 🔬 Trouver des vétérinaires et services\n • 🚚 Connecter des transporteurs et livreurs\n• 📢 Poster ou consulter des demandes d'achat\n\nNotre mission : centraliser l'offre, faciliter la mise en relation et soutenir la digitalisation progressive du secteur.",
         replies: ["Comment publier une annonce ?", "Trouver un vétérinaire", "Les abonnements", "Contacter le support"],
     };
     case "contact":
@@ -179,6 +186,43 @@ export async function POST(request: NextRequest) {
           intent,
           answer,
           quickReplies: ["Comment payer ?", "Comment publier une annonce ?", "Je veux vendre gratuitement", "Autre question"],
+          data: plans,
+        },
+      });
+    }
+
+    if (intent === "how_video") {
+      const plans = await prisma.plan.findMany({
+        where: { isActive: true, isVisible: true },
+        orderBy: { sortOrder: "asc" },
+        select: { name: true, price: true, maxVideosPerListing: true, maxVideoSizeMb: true },
+      }).catch(() => []);
+      let answer =
+        "Oui, vous pouvez **publier des vidéos** sur vos annonces Jurgi ! 🎬\n\n1. Au moment de publier (ou en modifiant une annonce), ajoutez vos **vidéos** (format MP4) dans la section média.\n2. Le **nombre de vidéos** autorisé dépend de votre **abonnement**.\n3. Vos acheteurs pourront voir la vidéo directement sur votre annonce.\n\n";
+      if (plans.length > 0) {
+        const withVideos = plans.filter((p) => p.maxVideosPerListing > 0);
+        const maxSize = plans.find((p) => p.maxVideoSizeMb > 0)?.maxVideoSizeMb || 50;
+        if (withVideos.length > 0) {
+          answer +=
+            "Voici votre plafond de vidéos par annonce selon la formule :\n" +
+            withVideos
+              .map((p) => `• **${p.name}** — ${p.maxVideosPerListing} vidéo${p.maxVideosPerListing > 1 ? "s" : ""} / annonce`)
+              .join("\n") +
+            `\n\n📦 Taille maximale par vidéo : **${maxSize} Mo**.\n`;
+        }
+        const noVideos = plans.filter((p) => p.maxVideosPerListing === 0);
+        if (noVideos.length > 0) {
+          answer += `\nℹ️ Certains abonnements (${noVideos.map((p) => p.name).join(", ")}) n'incluent pas de vidéos : passez à une formule compatible si vous souhaitez en publier.\n`;
+        }
+        answer += "\nVous pouvez changer de formule à tout moment sur la page **Abonnements** (/abonnement).";
+      } else {
+        answer += "Pour connaître le nombre exact de vidéos autorisé, consultez la page **Abonnements** (/abonnement).";
+      }
+      return NextResponse.json({
+        reply: {
+          intent,
+          answer,
+          quickReplies: ["Combien coûte un abonnement ?", "Comment publier une annonce ?", "Trouver un vétérinaire", "Autre question"],
           data: plans,
         },
       });
