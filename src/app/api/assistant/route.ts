@@ -26,6 +26,7 @@ function findIntent(q: string): string {
   if (hasAny(q, ["paiement", "payer", "payer mon abonnement", "mobile money", "wave", "orange money", "paiement wave", "transition", "activer mon compte", "code d'activation", "abonnement"])) return "payment";
   if (hasAny(q, ["prix", "abonnement", "plan", "forfait", "combien coute", "tarif", "formule", "inscription gratuite", "gratuit"])) return "plans";
   if (hasAny(q, ["profil professionnel", "profil pro", "compte professionnel", "compte pro", "devenir vet", "devenir veterinaire", "devenir transporteur", "devenir livreur", "devenir un vet", "devenir un veterinaire", "devenir un transporteur", "devenir un livreur", "espace pro", "creer un profil professionnel", "professionnel"])) return "professional_profile";
+  if ((hasAny(q, ["profil"]) && hasAny(q, ["completer", "remplir", "modifier", "mettre a jour", "editer", "mon profil"]))) return "complete_profile";
   if (hasAny(q, ["vet", "veterinaire", "docteur", "soigner", "vaccination", "sante animale", "maladie", "soin"])) return "find_vet";
   if (hasAny(q, ["transport", "transporteur", "livraison", "camelion", "camion"])) return "find_transporter";
   if (hasAny(q, ["livreur", "livreur livreur", "course", "deplace"])) return "find_livreur";
@@ -77,6 +78,12 @@ function faqAnswer(intent: string, phone: string = DEFAULT_PAYMENT_PHONE): { ans
         answer:
           "Pour créer un **profil professionnel** sur Jurgi, c'est simple : 🛡️\n\n1. Cliquez sur **\"Créer un compte\"** en haut de la page.\n2. Renseignez vos informations (nom, téléphone ou email, mot de passe).\n3. À l'étape **Rôle**, choisissez votre métier parmi les profils marqués **Pro** :\n   • 🩺 **Vétérinaire / Technicien**\n   • 🚛 **Transporteur**\n   • 🛵 **Livreur**\n   • 🏛️ **Institution / Coopérative**\n4. Indiquez votre **région**, puis validez.\n\n🎯 Votre compte professionnel sera alors **examiné et validé par notre équipe** (sous quelques heures) avant d'être activé. Vous pouvez aussi publier votre fiche pro détaillée (services, zones desservies, tarifs...) une fois connecté dans votre espace.\n\n💡 Un compte pro vous permet d'apparaître dans les annuaires, de publier des offres et d'être contacté directement par les éleveurs.",
         quickReplies: ["Comment publier une annonce ?", "Devenir vétérinaire", "Combien ça coûte ?", "Payer mon abonnement"],
+    };
+    case "complete_profile":
+      return {
+        answer:
+          "Pour **compléter votre profil** (vendeur, vétérinaire, transporteur, livreur, institution...), c'est simple :\n\n1. **Connectez-vous** à votre compte Jurgi.\n2. Rendez-vous dans votre **espace** : cliquez sur votre compte / profil, puis **\"Mon profil\"** (ou la section correspondant à votre métier, ex. la page **/livreur/profil** pour un livreur).\n3. Remplissez les informations demandées selon votre activité :\n   • 🧑 **Nom / raison sociale** et **photo**\n   • 📞 **Téléphone / WhatsApp** de contact\n   • 🚚 **Véhicule / capacité** (pour transporteur ou livreur)\n   • 📍 **Zones desservies** et **disponibilité**\n   • 🛒 **Types de produits acceptés / tarifs**\n4. **Enregistrez** : vos informations sont immédiatement prises en compte sur votre fiche publique.\n\n💡 Un profil complet rassure vos clients et améliore vos chances d'être contacté.",
+        quickReplies: ["Comment publier une annonce ?", "Devenir un livreur", "Combien ça coûte ?", "Payer mon abonnement"],
     };
     case "about":
       return {
@@ -157,7 +164,7 @@ async function resolveAssistant(
     };
   }
 
-  if (intent === "how_publish" || intent === "how_register" || intent === "how_login" || intent === "professional_profile" || intent === "about" || intent === "contact") {
+  if (intent === "how_publish" || intent === "how_register" || intent === "how_login" || intent === "professional_profile" || intent === "complete_profile" || intent === "about" || intent === "contact") {
     return { intent, ...faqAnswer(intent, paymentPhone) };
   }
 
