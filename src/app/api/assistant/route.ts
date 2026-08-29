@@ -25,6 +25,7 @@ function findIntent(q: string): string {
   if (hasAny(q, ["publier", "annonce", "mettre en vente", "vendre", "vendre mon", "create", "ajouter une annonce", "afficher mon produit"])) return "how_publish";
   if (hasAny(q, ["paiement", "payer", "payer mon abonnement", "mobile money", "wave", "orange money", "paiement wave", "transition", "activer mon compte", "code d'activation", "abonnement"])) return "payment";
   if (hasAny(q, ["prix", "abonnement", "plan", "forfait", "combien coute", "tarif", "formule", "inscription gratuite", "gratuit"])) return "plans";
+  if (hasAny(q, ["profil professionnel", "profil pro", "compte professionnel", "compte pro", "devenir vet", "devenir veterinaire", "devenir transporteur", "devenir livreur", "espace pro", "creer un profil professionnel"])) return "professional_profile";
   if (hasAny(q, ["vet", "veterinaire", "docteur", "soigner", "vaccination", "sante animale", "maladie", "soin"])) return "find_vet";
   if (hasAny(q, ["transport", "transporteur", "livraison", "camelion", "camion"])) return "find_transporter";
   if (hasAny(q, ["livreur", "livreur livreur", "course", "deplace"])) return "find_livreur";
@@ -70,6 +71,12 @@ function faqAnswer(intent: string, phone: string = DEFAULT_PAYMENT_PHONE): { ans
         answer:
           "Pour vous connecter à Jurgi :\n\n1. Cliquez sur **\"Se connecter\"** en haut de la page.\n2. Saisissez votre **numéro de téléphone** (ou email) et votre **mot de passe**.\n3. Vous arrivez sur votre espace personnel.\n\nSi vous avez oublié votre mot de passe, utilisez le lien **\"Mot de passe oublié ?\"** en bas du formulaire : un nouveau mot de passe vous sera envoyé.",
         quickReplies: ["Mot de passe oublié", "Comment publier ?", "Payer mon abonnement", "Contacter le support"],
+    };
+    case "professional_profile":
+      return {
+        answer:
+          "Pour créer un **profil professionnel** sur Jurgi, c'est simple : 🛡️\n\n1. Cliquez sur **\"Créer un compte\"** en haut de la page.\n2. Renseignez vos informations (nom, téléphone ou email, mot de passe).\n3. À l'étape **Rôle**, choisissez votre métier parmi les profils marqués **Pro** :\n   • 🩺 **Vétérinaire / Technicien**\n   • 🚛 **Transporteur**\n   • 🛵 **Livreur**\n   • 🏛️ **Institution / Coopérative**\n4. Indiquez votre **région**, puis validez.\n\n🎯 Votre compte professionnel sera alors **examiné et validé par notre équipe** (sous quelques heures) avant d'être activé. Vous pouvez aussi publier votre fiche pro détaillée (services, zones desservies, tarifs...) une fois connecté dans votre espace.\n\n💡 Un compte pro vous permet d'apparaître dans les annuaires, de publier des offres et d'être contacté directement par les éleveurs.",
+        quickReplies: ["Comment publier une annonce ?", "Devenir vétérinaire", "Combien ça coûte ?", "Payer mon abonnement"],
     };
     case "about":
       return {
@@ -150,7 +157,7 @@ async function resolveAssistant(
     };
   }
 
-  if (intent === "how_publish" || intent === "how_register" || intent === "how_login" || intent === "about" || intent === "contact") {
+  if (intent === "how_publish" || intent === "how_register" || intent === "how_login" || intent === "professional_profile" || intent === "about" || intent === "contact") {
     return { intent, ...faqAnswer(intent, paymentPhone) };
   }
 
