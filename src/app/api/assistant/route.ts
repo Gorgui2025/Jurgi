@@ -25,7 +25,7 @@ function findIntent(q: string): string {
   if (hasAny(q, ["publier", "annonce", "mettre en vente", "vendre", "vendre mon", "create", "ajouter une annonce", "afficher mon produit"])) return "how_publish";
   if (hasAny(q, ["paiement", "payer", "payer mon abonnement", "mobile money", "wave", "orange money", "paiement wave", "transition", "activer mon compte", "code d'activation", "abonnement"])) return "payment";
   if (hasAny(q, ["prix", "abonnement", "plan", "forfait", "combien coute", "tarif", "formule", "inscription gratuite", "gratuit"])) return "plans";
-  if (hasAny(q, ["profil professionnel", "profil pro", "compte professionnel", "compte pro", "devenir vet", "devenir veterinaire", "devenir transporteur", "devenir livreur", "espace pro", "creer un profil professionnel"])) return "professional_profile";
+  if (hasAny(q, ["profil professionnel", "profil pro", "compte professionnel", "compte pro", "devenir vet", "devenir veterinaire", "devenir transporteur", "devenir livreur", "devenir un vet", "devenir un veterinaire", "devenir un transporteur", "devenir un livreur", "espace pro", "creer un profil professionnel", "professionnel"])) return "professional_profile";
   if (hasAny(q, ["vet", "veterinaire", "docteur", "soigner", "vaccination", "sante animale", "maladie", "soin"])) return "find_vet";
   if (hasAny(q, ["transport", "transporteur", "livraison", "camelion", "camion"])) return "find_transporter";
   if (hasAny(q, ["livreur", "livreur livreur", "course", "deplace"])) return "find_livreur";
