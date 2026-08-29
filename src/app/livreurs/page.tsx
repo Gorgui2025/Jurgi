@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   Search,
   MapPin,
@@ -65,6 +66,7 @@ const PAGE_SIZE = 12;
 
 interface DeliveryDriver {
   id: string;
+  userId: string | null;
   name: string | null;
   phone: string | null;
   whatsapp: string | null;
@@ -125,6 +127,37 @@ function LivreursContent() {
   const [selectedVehicle, setSelectedVehicle] = useState("all");
   const [selectedAvailability, setSelectedAvailability] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [sendingId, setSendingId] = useState<string | null>(null);
+
+  const handleMessage = async (driver: DeliveryDriver) => {
+    if (!session?.user?.id || !driver.userId) {
+      router.push("/connexion");
+      return;
+    }
+    setSendingId(driver.id);
+    try {
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderId: session.user.id,
+          receiverId: driver.userId,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data?.id) {
+        router.push(`/messages/${data.id}`);
+      }
+    } catch {
+      // silencieux
+    } finally {
+      setSendingId(null);
+    }
+  };
+
 
   const fetchDrivers = async (pageNum: number, append: boolean) => {
     const params = new URLSearchParams();
@@ -447,6 +480,19 @@ function LivreursContent() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-beigebrume-100">
+                  <button
+                    type="button"
+                    onClick={() => handleMessage(driver)}
+                    disabled={sendingId === driver.id}
+                    className="btn-secondary text-xs py-2 px-4 flex items-center gap-1.5"
+                  >
+                    {sendingId === driver.id ? (
+                      <div className="w-3.5 h-3.5 border-2 border-baobab-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <MessageCircle className="w-3.5 h-3.5" />
+                    )}
+                    Message
+                  </button>
                   {driver.phone && (
                     <a
                       href={`tel:${driver.phone}`}
