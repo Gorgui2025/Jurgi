@@ -653,7 +653,8 @@ function SettingsTab({ admin }: { admin: AdminUser }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-xs text-charbon-300 mb-1 block">Plan d&apos;essai</label>
-            <select value={settings.trial_plan_slug || "express"} onChange={e => setSettings(p => ({ ...p, trial_plan_slug: e.target.value }))} className="input-field text-sm">
+            <select value={settings.trial_plan_slug || "ndimbale"} onChange={e => setSettings(p => ({ ...p, trial_plan_slug: e.target.value }))} className="input-field text-sm">
+              <option value="ndimbale">Jurgi Ndimbale (7j)</option>
               <option value="express">Jurgi Express (7j)</option>
               <option value="pro">Jurgi Pro (30j)</option>
             </select>
@@ -1141,6 +1142,7 @@ function SubscriptionsTab({ admin }: { admin: AdminUser }) {
       price: plan.price,
       durationDays: plan.durationDays,
       maxActiveListings: plan.maxActiveListings,
+      dailyListingsQuota: plan.dailyListingsQuota,
       maxPhotosPerListing: plan.maxPhotosPerListing,
       maxVideosPerListing: plan.maxVideosPerListing,
       maxVideoSizeMb: plan.maxVideoSizeMb,
@@ -1165,6 +1167,7 @@ function SubscriptionsTab({ admin }: { admin: AdminUser }) {
           price: parseInt(editForm.price),
           durationDays: parseInt(editForm.durationDays),
           maxActiveListings: parseInt(editForm.maxActiveListings),
+          dailyListingsQuota: parseInt(editForm.dailyListingsQuota),
           maxPhotosPerListing: parseInt(editForm.maxPhotosPerListing),
           maxVideosPerListing: parseInt(editForm.maxVideosPerListing),
           maxVideoSizeMb: parseInt(editForm.maxVideoSizeMb),
@@ -1241,6 +1244,10 @@ function SubscriptionsTab({ admin }: { admin: AdminUser }) {
                   <p className="text-[10px] text-charbon-300">annonces</p>
                 </div>
                 <div className="p-2 bg-beigebrume-50 rounded-lg">
+                  <p className="text-lg font-bold text-baobab-500">{p.dailyListingsQuota || "∞"}</p>
+                  <p className="text-[10px] text-charbon-300">pub/jour</p>
+                </div>
+                <div className="p-2 bg-beigebrume-50 rounded-lg">
                   <p className="text-lg font-bold text-baobab-500">{p.maxPhotosPerListing}</p>
                   <p className="text-[10px] text-charbon-300">photos</p>
                 </div>
@@ -1285,6 +1292,10 @@ function SubscriptionsTab({ admin }: { admin: AdminUser }) {
                 <div>
                   <label className="text-xs text-charbon-300 mb-1 block">Max annonces actives</label>
                   <input type="number" value={editForm.maxActiveListings || 0} onChange={e => setEditForm(p => ({ ...p, maxActiveListings: e.target.value }))} className="input-field text-sm" />
+                </div>
+                <div>
+                  <label className="text-xs text-charbon-300 mb-1 block">Nouvelles pub/jour (0 = illimité)</label>
+                  <input type="number" value={editForm.dailyListingsQuota || 0} onChange={e => setEditForm(p => ({ ...p, dailyListingsQuota: e.target.value }))} className="input-field text-sm" />
                 </div>
                 <div>
                   <label className="text-xs text-charbon-300 mb-1 block">Max photos/annonce</label>

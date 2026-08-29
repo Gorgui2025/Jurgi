@@ -181,17 +181,32 @@ async function resolveAssistant(
 
     if (intent === "plans") {
       const plans = await prisma.plan.findMany({
-        where: { isActive: true, isVisible: true },
+        where: { isActive: true, isVisible: true, slug: { not: "livreur" } },
         orderBy: { sortOrder: "asc" },
-        select: { name: true, description: true, price: true, durationDays: true, isTrialEligible: true },
+        select: {
+          name: true,
+          description: true,
+          price: true,
+          durationDays: true,
+          isTrialEligible: true,
+          dailyListingsQuota: true,
+          maxActiveListings: true,
+        },
       }).catch(() => []);
       let answer =
         "Voici les formules d'abonnement Jurgi :\n\n";
+      const fmtDur = (d: number) => (d >= 365 ? "1 an" : `${d} jours`);
       if (plans.length === 0) {
         answer += "Les détails des formules sont disponibles sur la page **Abonnements** (/abonnement). L'inscription de base et la publication d'annonces peuvent être gratuites selon votre plan.\n\nVous pouvez aussi payer via **Mobile Money** : 📞 **" + paymentPhone + "**.";
       } else {
         answer += plans
-          .map((p) => `• **${p.name}** — ${p.price.toLocaleString("fr-FR")} FCFA / ${p.durationDays} j${p.isTrialEligible ? " (essai gratuit possible)" : ""}${p.description ? " — " + p.description : ""}`)
+          .map((p) => {
+            const extra: string[] = [];
+            if (p.maxActiveListings) extra.push(`${p.maxActiveListings} annonces actives`);
+            if (p.dailyListingsQuota) extra.push(`${p.dailyListingsQuota} nouvelle publication/jour`);
+            const desc = extra.length ? " (" + extra.join(", ") + ")" : "";
+            return `• **${p.name}** — ${p.price.toLocaleString("fr-FR")} FCFA / ${fmtDur(p.durationDays)}${p.isTrialEligible ? " (essai gratuit 7 j)" : ""}${desc}${p.description ? " — " + p.description : ""}`;
+          })
           .join("\n");
         answer += "\n\nVous pouvez payer via **Mobile Money** : 📞 **" + paymentPhone + "**.";
       }

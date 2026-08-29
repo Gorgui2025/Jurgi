@@ -12,7 +12,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { slug, name, description, price, durationDays, maxActiveListings, maxPhotosPerListing, maxVideosPerListing, maxVideoSizeMb, autoRenew, isTrialEligible, commercialMessage, createdByAdminId } = body;
+    const { slug, name, description, price, durationDays, maxActiveListings, dailyListingsQuota, maxPhotosPerListing, maxVideosPerListing, maxVideoSizeMb, autoRenew, isTrialEligible, commercialMessage, createdByAdminId } = body;
 
     if (!slug || !name) {
       return NextResponse.json({ error: "slug et name requis" }, { status: 400 });
@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
         price: price || 0,
         durationDays: durationDays || 0,
         maxActiveListings: maxActiveListings || 3,
+        dailyListingsQuota: dailyListingsQuota || 0,
         maxPhotosPerListing: maxPhotosPerListing || 6,
         maxVideosPerListing: maxVideosPerListing || 1,
         maxVideoSizeMb: maxVideoSizeMb || 50,
