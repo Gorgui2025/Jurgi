@@ -188,9 +188,19 @@ export default function LivreurProfilPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
     setErrorMessage("");
     setSuccessMessage("");
+
+    if (!form.telephone.trim()) {
+      setErrorMessage("Le numéro de téléphone est obligatoire.");
+      return;
+    }
+    if (form.zonesCouvertes.length === 0) {
+      setErrorMessage("Veuillez renseigner au moins une zone couverte (région et commune). Pour cela, ajoutez une zone avec le bouton « + Ajouter ».");
+      return;
+    }
+
+    setSaving(true);
 
     try {
       const userId = (session?.user as any)?.id || (session?.user as any)?.email;
@@ -436,7 +446,7 @@ export default function LivreurProfilPage() {
         <section className="card">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
             <MapPin className="w-5 h-5 text-primary" />
-            Zones couvertes
+            Zones couvertes *
           </h2>
 
           <div className="flex flex-col sm:flex-row gap-2 mb-3">
@@ -484,7 +494,7 @@ export default function LivreurProfilPage() {
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-gray-400">Aucune zone ajoutée.</p>
+            <p className="text-sm text-gray-400">Aucune zone ajoutée. Une zone est obligatoire.</p>
           )}
         </section>
 
