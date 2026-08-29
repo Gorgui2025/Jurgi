@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { checkListingQuota } from "@/lib/listingQuota";
 
 export async function GET(
   request: NextRequest,
@@ -82,6 +83,20 @@ export async function PUT(
     };
 
     if (renew) {
+      const existing = await prisma.listing.findUnique({ where: { id: params.id } });
+      if (existing?.userId) {
+        const quota = await checkListingQuota(existing.userId);
+        if (!quota.allowed) {
+          const message =
+            quota.reason === "daily_limit"
+              ? "Vous avez atteint votre limite de publication pour aujourd'hui. Vous pourrez publier une nouvelle annonce demain."
+              : `Limite atteinte (${quota.activeListings}/${quota.maxActiveListings} annonces actives sur le plan ${quota.planName}). Passez à une offre supérieure.`;
+          return NextResponse.json(
+            { error: quota.reason === "daily_limit" ? "daily_quota_reached" : "quota_reached", message, quota },
+            { status: 403 }
+          );
+        }
+      }
       updateData.status = "active";
       updateData.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     }

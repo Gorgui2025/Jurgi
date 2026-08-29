@@ -335,12 +335,17 @@ export default function MesAnnoncesPage() {
                       <button
                         onClick={async () => {
                           try {
-                            await fetch(`/api/listings/${listing.id}`, {
+                            const res = await fetch(`/api/listings/${listing.id}`, {
                               method: "PUT",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ renew: true }),
                             });
-                            setListings((prev) => prev.map((l) => l.id === listing.id ? { ...l, status: "active" } : l));
+                            const d = await res.json().catch(() => ({}));
+                            if (res.ok) {
+                              setListings((prev) => prev.map((l) => l.id === listing.id ? { ...l, status: "active" } : l));
+                            } else {
+                              alert(d.message || d.error || "Impossible de réactiver l'annonce (limite atteinte).");
+                            }
                           } catch {}
                         }}
                         className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg bg-vertprofond-50 text-vertprofond-600 hover:bg-vertprofond-100 transition-colors"

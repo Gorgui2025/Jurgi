@@ -1,23 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-
-async function checkQuota(userId: string): Promise<{ allowed: boolean; maxListings: number; activeListings: number; planName: string }> {
-  const sub = await prisma.subscription.findFirst({
-    where: { userId, status: "active" },
-    include: { plan: true },
-    orderBy: { createdAt: "desc" },
-  });
-
-  const plan = sub?.plan || await prisma.plan.findUnique({ where: { slug: "gratuit" } });
-  const maxListings = plan?.maxActiveListings || 3;
-  const planName = plan?.name || "Gratuit";
-
-  const activeListings = await prisma.listing.count({
-    where: { userId, status: "active" },
-  });
-
-  return { allowed: activeListings < maxListings, maxListings, activeListings, planName };
-}
+import { checkListingQuota } from "@/lib/listingQuota";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -179,12 +162,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const quota = await checkQuota(resolvedUserId);
+    const quota = await checkListingQuota(resolvedUserId);
     if (!quota.allowed) {
+      const message =
+        quota.reason === "daily_limit"
+          ? "Vous avez atteint votre limite de publication pour aujourd'hui. Vous pourrez publier une nouvelle annonce demain."
+          : `Limite atteinte (${quota.activeListings}/${quota.maxActiveListings} annonces actives sur le plan ${quota.planName}). Passez à une offre supérieure pour publier davantage.`;
       return NextResponse.json(
         {
-          error: "quota_reached",
-          message: `Limite atteinte (${quota.activeListings}/${quota.maxListings} annonces actives sur le plan ${quota.planName}). Passez à un offres supérieure pour publier davantage.`,
+          error: quota.reason === "daily_limit" ? "daily_quota_reached" : "quota_reached",
+          message,
           quota,
         },
         { status: 403 }

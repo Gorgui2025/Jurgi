@@ -321,6 +321,7 @@ model Plan {
   currency                String   @default("XOF")
   durationDays            Int      @default(0)
   maxActiveListings       Int      @default(3)
+  dailyListingsQuota      Int      @default(0)
   maxPhotosPerListing     Int      @default(6)
   maxVideosPerListing     Int      @default(1)
   maxVideoSizeMb          Int      @default(50)
