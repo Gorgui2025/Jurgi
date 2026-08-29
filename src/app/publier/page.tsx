@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, ArrowRight, Upload, ImagePlus, Film, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, ImagePlus, Film, X, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 const DOMAINS = [
@@ -141,6 +141,7 @@ export default function PublierPage() {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [quotaError, setQuotaError] = useState<{ message: string; isDaily: boolean } | null>(null);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showExtra, setShowExtra] = useState(false);
@@ -213,6 +214,26 @@ export default function PublierPage() {
           </p>
         </div>
       </div>
+
+      {quotaError && (
+        <div className="card p-4 mb-6 border border-ocre-300 bg-ocre-50">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-ocre-500 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-charbon-500">{quotaError.message}</p>
+              {quotaError.isDaily ? (
+                <p className="text-xs text-charbon-400 mt-1">
+                  Vous publiez régulièrement ? Les formules <Link href="/abonnement" className="text-baobab-500 hover:underline font-medium">Jurgi Express</Link> et <Link href="/abonnement" className="text-baobab-500 hover:underline font-medium">Jurgi Pro</Link> offrent davantage d'annonces et de visibilité.
+                </p>
+              ) : (
+                <p className="text-xs text-charbon-400 mt-1">
+                  Passez à une formule supérieure pour publier davantage : <Link href="/abonnement" className="text-baobab-500 hover:underline font-medium">voir les offres</Link>.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-1 mb-6">
         {[0, 1, 2].map((i) => (
@@ -572,7 +593,14 @@ export default function PublierPage() {
                   }),
                 });
                 if (res.ok) { setSubmitted(true); }
-                else { const d = await res.json(); alert(d.error || "Erreur lors de la publication"); }
+                else {
+                  const d = await res.json();
+                  if (d.error === "daily_quota_reached" || d.error === "quota_reached") {
+                    setQuotaError({ message: d.message || "Limite atteinte.", isDaily: d.error === "daily_quota_reached" });
+                  } else {
+                    alert(d.error || "Erreur lors de la publication");
+                  }
+                }
               } catch { alert("Erreur réseau"); }
               finally { setSubmitting(false); }
             }}

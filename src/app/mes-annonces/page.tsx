@@ -36,7 +36,7 @@ export default function MesAnnoncesPage() {
   const [editForm, setEditForm] = useState<Partial<Listing>>({});
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "active" | "reserved" | "sold" | "expired" | "suspended">("all");
+  const [filter, setFilter] = useState<"all" | "active" | "reserved" | "sold" | "expired" | "suspended" | "SUSPENDED_BY_QUOTA">("all");
 
   const STATUS_LABELS: Record<string, string> = {
     active: "Active",
@@ -44,6 +44,7 @@ export default function MesAnnoncesPage() {
     sold: "Vendue",
     expired: "Expirée",
     suspended: "Suspendue",
+    SUSPENDED_BY_QUOTA: "Suspendue (quota)",
     draft: "Brouillon",
     pending: "En attente",
     archived: "Archivée",
@@ -55,6 +56,7 @@ export default function MesAnnoncesPage() {
     sold: "bg-ocre-100 text-ocre-600",
     expired: "bg-beigebrume-200 text-charbon-400",
     suspended: "bg-rougeterre-100 text-rougeterre-600",
+    SUSPENDED_BY_QUOTA: "bg-ocre-50 text-ocre-700",
     draft: "bg-gray-100 text-gray-500",
     pending: "bg-amber-50 text-amber-600",
     archived: "bg-gray-100 text-gray-400",
@@ -152,7 +154,7 @@ export default function MesAnnoncesPage() {
 
       {/* Filters */}
       <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-        {(["all", "active", "reserved", "sold", "expired", "suspended"] as const).map((f) => (
+        {(["all", "active", "reserved", "sold", "expired", "suspended", "SUSPENDED_BY_QUOTA"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -357,6 +359,14 @@ export default function MesAnnoncesPage() {
                       <span className="text-[11px] px-2.5 py-1.5 text-rougeterre-500">
                         Suspendue par un administrateur
                       </span>
+                    )}
+                    {listing.status === "SUSPENDED_BY_QUOTA" && (
+                      <Link
+                        href="/abonnement"
+                        className="text-[11px] px-2.5 py-1.5 rounded-lg bg-ocre-50 text-ocre-600 hover:bg-ocre-100 transition-colors"
+                      >
+                        Suspendue : limite de votre offre dépassée. Voir les formules pour la réactiver.
+                      </Link>
                     )}
                     <Link
                       href={`/marketplace/${listing.id}`}
