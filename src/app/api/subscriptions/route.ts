@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { africaDakarDayStart } from "@/lib/listingQuota";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -20,8 +21,16 @@ export async function GET(request: NextRequest) {
 
     let planQuotas = null;
     if (subscription?.plan) {
+      const publishedToday = subscription.plan.dailyListingsQuota > 0
+        ? await prisma.listing.count({ where: { userId, createdAt: { gte: africaDakarDayStart() } } })
+        : 0;
       planQuotas = {
         maxActiveListings: subscription.plan.maxActiveListings,
+        dailyListingsQuota: subscription.plan.dailyListingsQuota,
+        publishedToday,
+        remainingDaily: subscription.plan.dailyListingsQuota > 0
+          ? Math.max(0, subscription.plan.dailyListingsQuota - publishedToday)
+          : -1,
         maxPhotosPerListing: subscription.plan.maxPhotosPerListing,
         maxVideosPerListing: subscription.plan.maxVideosPerListing,
         maxVideoSizeMb: subscription.plan.maxVideoSizeMb,
@@ -32,6 +41,9 @@ export async function GET(request: NextRequest) {
       const freePlan = await prisma.plan.findUnique({ where: { slug: "gratuit" } });
       planQuotas = {
         maxActiveListings: freePlan?.maxActiveListings || 3,
+        dailyListingsQuota: freePlan?.dailyListingsQuota || 0,
+        publishedToday: 0,
+        remainingDaily: -1,
         maxPhotosPerListing: freePlan?.maxPhotosPerListing || 6,
         maxVideosPerListing: freePlan?.maxVideosPerListing || 1,
         maxVideoSizeMb: freePlan?.maxVideoSizeMb || 50,

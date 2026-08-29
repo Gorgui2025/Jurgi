@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
   Crown, Zap, CheckCircle, Clock, CreditCard, ArrowRight, AlertTriangle,
-  Package, Image, Film, Loader2, Receipt, ShieldCheck,
+  Package, Image, Film, Loader2, Receipt, ShieldCheck, Flower2,
 } from "lucide-react";
 
 interface Plan {
@@ -17,6 +17,7 @@ interface Plan {
   currency: string;
   durationDays: number;
   maxActiveListings: number;
+  dailyListingsQuota: number;
   maxPhotosPerListing: number;
   maxVideosPerListing: number;
   maxVideoSizeMb: number;
@@ -27,6 +28,9 @@ interface Plan {
 
 interface Quotas {
   maxActiveListings: number;
+  dailyListingsQuota: number;
+  publishedToday: number;
+  remainingDaily: number;
   maxPhotosPerListing: number;
   maxVideosPerListing: number;
   maxVideoSizeMb: number;
@@ -57,24 +61,34 @@ interface SubscriptionData {
 
 const PLAN_ICONS: Record<string, React.ReactNode> = {
   gratuit: <Package className="w-6 h-6" />,
+  ndimbale: <Flower2 className="w-6 h-6" />,
   express: <Zap className="w-6 h-6" />,
   pro: <Crown className="w-6 h-6" />,
 };
 
 const PLAN_COLORS: Record<string, string> = {
   gratuit: "border-charbon-200 bg-beigebrume-50",
+  ndimbale: "border-vertprofond-300 bg-vertprofond-50",
   express: "border-ocre-300 bg-ocre-50",
   pro: "border-baobab-300 bg-baobab-50",
 };
 
 const PLAN_TEXT: Record<string, string> = {
   gratuit: "text-charbon-500",
+  ndimbale: "text-vertprofond-600",
   express: "text-ocre-600",
   pro: "text-baobab-600",
 };
 
 function formatPrice(price: number): string {
   return price.toLocaleString("fr-FR") + " FCFA";
+}
+
+function formatDuration(durationDays: number): string {
+  if (durationDays <= 0) return "Illimité";
+  if (durationDays % 365 === 0) return `${durationDays / 365} an${durationDays / 365 > 1 ? "s" : ""}`;
+  if (durationDays % 30 === 0) return `${durationDays / 30} mois`;
+  return `${durationDays} jours`;
 }
 
 export default function AbonnementPage() {
@@ -207,7 +221,7 @@ export default function AbonnementPage() {
             <div className={PLAN_TEXT[currentPlan.slug] || "text-charbon-500"}>{PLAN_ICONS[currentPlan.slug]}</div>
             <div>
               <h2 className="text-lg font-bold text-charbon-500">{currentPlan.name}</h2>
-              <p className="text-sm text-charbon-300">{formatPrice(currentPlan.price)} {currentPlan.durationDays > 0 ? `/ ${currentPlan.durationDays} jours` : "— illimité"}</p>
+              <p className="text-sm text-charbon-300">{formatPrice(currentPlan.price)} {currentPlan.durationDays > 0 ? `/ ${formatDuration(currentPlan.durationDays)}` : "— illimité"}</p>
             </div>
             <span className={`ml-auto text-xs px-3 py-1 rounded-full font-medium ${
               subscription?.status === "active" ? "bg-vertprofond-100 text-vertprofond-600" :
@@ -231,10 +245,17 @@ export default function AbonnementPage() {
                 <p className="text-2xl font-bold text-baobab-500">{quotas.activeListings}</p>
                 <p className="text-[10px] text-charbon-300">/ {quotas.maxActiveListings} annonces</p>
               </div>
-              <div className="text-center p-3 bg-white/60 rounded-lg">
-                <p className="text-2xl font-bold text-baobab-500">{quotas.maxPhotosPerListing}</p>
-                <p className="text-[10px] text-charbon-300">photos/annonce</p>
-              </div>
+              {quotas.dailyListingsQuota > 0 ? (
+                <div className="text-center p-3 bg-white/60 rounded-lg">
+                  <p className="text-2xl font-bold text-baobab-500">{quotas.remainingDaily >= 0 ? quotas.remainingDaily : quotas.publishedToday}</p>
+                  <p className="text-[10px] text-charbon-300">publication(s) aujourd&apos;hui</p>
+                </div>
+              ) : (
+                <div className="text-center p-3 bg-white/60 rounded-lg">
+                  <p className="text-2xl font-bold text-baobab-500">{quotas.maxPhotosPerListing}</p>
+                  <p className="text-[10px] text-charbon-300">photos/annonce</p>
+                </div>
+              )}
               <div className="text-center p-3 bg-white/60 rounded-lg">
                 <p className="text-2xl font-bold text-baobab-500">{quotas.maxVideosPerListing}</p>
                 <p className="text-[10px] text-charbon-300">vidéos/annonce</p>
@@ -281,7 +302,7 @@ export default function AbonnementPage() {
           <div className="card p-4 bg-ocre-50 border border-ocre-200 mb-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-ocre-600">Essai gratuit disponible</p>
-              <p className="text-xs text-charbon-400">Testez Jurgi Express pendant 7 jours sans engagement.</p>
+              <p className="text-xs text-charbon-400">Testez gratuitement pendant 7 jours, puis passez à la formule qui vous convient.</p>
             </div>
             <button
               onClick={handleTrial}
@@ -309,15 +330,23 @@ export default function AbonnementPage() {
                   <div className={`mx-auto mb-2 ${PLAN_TEXT[plan.slug]}`}>{PLAN_ICONS[plan.slug]}</div>
                   <h3 className="font-bold text-charbon-500">{plan.name}</h3>
                   <p className="text-2xl font-bold text-charbon-500 mt-2">{formatPrice(plan.price)}</p>
-                  {plan.durationDays > 0 && <p className="text-xs text-charbon-300">{plan.durationDays} jours</p>}
+                  {plan.durationDays > 0 && <p className="text-xs text-charbon-300">{plan.slug === "ndimbale" ? "12 mois" : formatDuration(plan.durationDays)}</p>}
                   {plan.durationDays === 0 && <p className="text-xs text-charbon-300">Illimité</p>}
                 </div>
 
                 <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-xs text-charbon-400">
-                    <CheckCircle className="w-3 h-3 text-vertprofond-500 shrink-0" />
-                    <span>{plan.maxActiveListings} annonces actives</span>
-                  </div>
+                  {plan.maxActiveListings > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-charbon-400">
+                      <CheckCircle className="w-3 h-3 text-vertprofond-500 shrink-0" />
+                      <span>{plan.maxActiveListings} annonces actives</span>
+                    </div>
+                  )}
+                  {plan.dailyListingsQuota > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-charbon-400">
+                      <CheckCircle className="w-3 h-3 text-vertprofond-500 shrink-0" />
+                      <span>1 nouvelle annonce par jour</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 text-xs text-charbon-400">
                     <CheckCircle className="w-3 h-3 text-vertprofond-500 shrink-0" />
                     <span>{plan.maxPhotosPerListing} photos par annonce</span>

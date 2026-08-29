@@ -106,7 +106,7 @@ export default function PaymentForm({ plan, paymentNumber, paymentMethods }: { p
               <div className="bg-gradient-to-r from-baobab-500 to-vertprofond-500 p-6 text-white">
                 <h1 className="text-xl font-bold">Souscrire à {plan.name}</h1>
                 <p className="text-sm opacity-90 mt-1">
-                  {plan.durationDays} jours — {plan.maxActiveListings} annonces actives
+                  {plan.durationDays >= 365 ? "12 mois" : `${plan.durationDays} jours`} — {plan.maxActiveListings} annonces actives
                 </p>
                 <div className="mt-3 text-3xl font-bold">
                   {plan.price === 0 ? "Gratuit" : `${plan.price.toLocaleString()} ${plan.currency}`}
