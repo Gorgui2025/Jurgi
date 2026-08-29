@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import SellerProfileClient from "./SellerProfileClient";
+import SellerProfileClient, { type SellerProfile } from "./SellerProfileClient";
 
 const BASE = "https://jurgi.vercel.app";
 
@@ -15,14 +15,19 @@ async function getUser(id: string) {
     select: {
       id: true,
       name: true,
+      avatar: true,
       bio: true,
       region: true,
       commune: true,
-      accountStatus: true,
       roles: true,
+      accountStatus: true,
+      isVerified: true,
+      verifiedLevel: true,
+      createdAt: true,
+      _count: { select: { listings: true } },
     },
   });
-  return user;
+  return user as (typeof user & { accountStatus: string }) | null;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -55,5 +60,6 @@ export default async function SellerProfilePage({ params }: Props) {
   if (!user || user.accountStatus !== "active") {
     notFound();
   }
-  return <SellerProfileClient />;
+  const profile = user as unknown as SellerProfile;
+  return <SellerProfileClient initialSeller={profile} />;
 }

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import {
   ArrowLeft,
@@ -17,7 +17,7 @@ import {
   X,
 } from "lucide-react"
 
-interface DeliveryProfile {
+export interface DeliveryProfile {
   id: string
   name: string
   photo: string | null
@@ -34,38 +34,17 @@ interface DeliveryProfile {
   tariff: string
   urgentDelivery: boolean
   weekendDelivery: boolean
-  phone: string
-  whatsapp: string
+  phone: string | null
+  whatsapp: string | null
 }
 
-export default function LivreurDetailClient() {
-  const params = useParams()
+export default function LivreurDetailClient({ initialProfile }: { initialProfile: DeliveryProfile }) {
   const router = useRouter()
   const { data: session } = useSession()
-  const [profile, setProfile] = useState<DeliveryProfile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<DeliveryProfile | null>(initialProfile)
+  const [loading, setLoading] = useState(false)
   const [notFound, setNotFound] = useState(false)
   const [contactMessage, setContactMessage] = useState("")
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch(`/api/delivery-profiles/${params.id}`)
-        if (!res.ok) {
-          setNotFound(true)
-          return
-        }
-        const data = await res.json()
-        setProfile(data)
-      } catch {
-        setNotFound(true)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProfile()
-  }, [params.id])
 
   const handleCall = () => {
     if (profile?.phone) {

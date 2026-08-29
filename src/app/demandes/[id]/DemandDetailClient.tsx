@@ -29,7 +29,7 @@ interface RequestUser {
   _count: { listings: number };
 }
 
-interface RequestDetail {
+export interface RequestDetail {
   id: string;
   title: string;
   description: string;
@@ -40,6 +40,7 @@ interface RequestDetail {
   deadline: string | null;
   urgency: string;
   status: string;
+  visibility: string;
   views: number;
   createdAt: string;
   user: RequestUser;
@@ -64,13 +65,13 @@ interface ResponseItem {
   };
 }
 
-export default function DemandDetailClient() {
+export default function DemandDetailClient({ initialDemand }: { initialDemand: RequestDetail }) {
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const [demand, setDemand] = useState<RequestDetail | null>(null);
+  const [demand, setDemand] = useState<RequestDetail | null>(initialDemand);
   const [responses, setResponses] = useState<ResponseItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showResponseModal, setShowResponseModal] = useState(false);
   const [responseForm, setResponseForm] = useState({ message: "", price: "" });
   const [submitting, setSubmitting] = useState(false);

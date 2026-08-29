@@ -51,7 +51,7 @@ interface ListingUser {
   _count: { listings: number };
 }
 
-interface Listing {
+export interface Listing {
   id: string;
   title: string;
   description: string;
@@ -79,12 +79,11 @@ interface Listing {
   category: { name: string; slug: string; domain: string };
 }
 
-export default function ListingDetailClient() {
-  const params = useParams();
+export default function ListingDetailClient({ initialListing }: { initialListing: Listing }) {  const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const [listing, setListing] = useState<Listing | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [listing, setListing] = useState<Listing | null>(initialListing);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeImage, setActiveImage] = useState(0);
   const [showReportModal, setShowReportModal] = useState(false);

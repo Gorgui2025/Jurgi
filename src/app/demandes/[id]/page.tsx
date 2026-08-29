@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import DemandDetailClient from "./DemandDetailClient";
+import DemandDetailClient, { type RequestDetail } from "./DemandDetailClient";
 
 const BASE = "https://jurgi.vercel.app";
 
@@ -9,23 +9,25 @@ interface Props {
   params: { id: string };
 }
 
-async function getRequest(id: string) {
+async function getRequest(id: string): Promise<RequestDetail> {
   const request = await prisma.request.findUnique({
     where: { id },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      quantity: true,
-      budget: true,
-      region: true,
-      commune: true,
-      status: true,
-      visibility: true,
-      category: { select: { name: true } },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+          isVerified: true,
+          createdAt: true,
+          _count: { select: { listings: true } },
+        },
+      },
+      category: { select: { name: true, slug: true } },
+      _count: { select: { responses: true } },
     },
   });
-  return request;
+  return request as unknown as RequestDetail;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -81,7 +83,7 @@ export default async function DemandDetailPage({ params }: Props) {
           }),
         }}
       />
-      <DemandDetailClient />
+      <DemandDetailClient initialDemand={request} />
     </>
   );
 }

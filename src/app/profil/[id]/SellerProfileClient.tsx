@@ -27,7 +27,7 @@ interface Review {
   reviewer: { id: string; name: string | null; avatar: string | null };
 }
 
-interface SellerProfile {
+export interface SellerProfile {
   id: string;
   name: string | null;
   avatar: string | null;
@@ -53,11 +53,15 @@ const ROLE_LABELS: Record<string, string> = {
   institut: "Institution",
 };
 
-export default function SellerProfileClient() {
+export default function SellerProfileClient({
+  initialSeller,
+}: {
+  initialSeller: SellerProfile;
+}) {
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const [seller, setSeller] = useState<SellerProfile | null>(null);
+  const [seller, setSeller] = useState<SellerProfile | null>(initialSeller);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsAvg, setReviewsAvg] = useState<number | null>(null);
   const [reviewsCount, setReviewsCount] = useState(0);
@@ -71,11 +75,9 @@ export default function SellerProfileClient() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/users?id=${params.id}`).then((r) => r.json()),
       fetch(`/api/reviews?userId=${params.id}`).then((r) => r.json()),
       fetch(`/api/listings?userId=${params.id}`).then((r) => r.json()),
-    ]).then(([sellerData, reviewsData, listingsData]) => {
-      setSeller(sellerData);
+    ]).then(([reviewsData, listingsData]) => {
       setReviews(reviewsData.reviews || []);
       setReviewsAvg(reviewsData.average);
       setReviewsCount(reviewsData.count || 0);

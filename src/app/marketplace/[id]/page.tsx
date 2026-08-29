@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import ListingDetailClient from "./ListingDetailClient";
+import ListingDetailClient, { type Listing } from "./ListingDetailClient";
 
 const BASE = "https://jurgi.vercel.app";
 
@@ -9,26 +9,32 @@ interface Props {
   params: { id: string };
 }
 
-async function getListing(id: string) {
+async function getListing(id: string): Promise<Listing> {
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      price: true,
-      priceOnDemand: true,
-      currency: true,
-      photos: true,
-      species: true,
-      breed: true,
-      region: true,
-      commune: true,
-      status: true,
-      category: { select: { name: true, slug: true } },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+          bio: true,
+          phone: true,
+          whatsapp: true,
+          isVerified: true,
+          verifiedLevel: true,
+          createdAt: true,
+          region: true,
+          phoneVisible: true,
+          _count: { select: { listings: true } },
+        },
+      },
+      category: {
+        select: { name: true, slug: true, domain: true },
+      },
     },
   });
-  return listing;
+  return listing as unknown as Listing;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -105,7 +111,7 @@ export default async function ListingDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ListingDetailClient />
+      <ListingDetailClient initialListing={listing} />
     </>
   );
 }
