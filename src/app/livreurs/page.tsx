@@ -404,13 +404,13 @@ function LivreursContent() {
       ) : (
         <div className="flex flex-col gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
           {drivers.map((driver) => {
-            const availability = AVAILABILITY_BADGE[driver.availability || "available"];
-            const vehicleLabel = VEHICLE_LABELS[driver.vehicleType || "motorcycle"];
+            const availability = driver.availability ? AVAILABILITY_BADGE[driver.availability] || null : null;
+            const vehicleLabel = driver.vehicleType ? VEHICLE_LABELS[driver.vehicleType] || driver.vehicleType : null;
             const acceptedTypes = parseAcceptedTypes(driver.acceptedTypes);
             const zones = parseZones(driver.zones);
             const location = driver.commune
-              ? `${driver.commune}, ${driver.region || "Sénégal"}`
-              : driver.region || "Sénégal";
+              ? `${driver.commune}${driver.region ? `, ${driver.region}` : ""}`
+              : driver.region || "";
 
             return (
               <div
@@ -446,23 +446,29 @@ function LivreursContent() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 mt-1">
-                      <span
-                        className={`badge text-[11px] ${availability.bg} ${availability.text}`}
-                      >
-                        {availability.label}
-                      </span>
-                      <span className="badge bg-vertbrume-100 text-baobab-600 text-[11px]">
-                        {vehicleLabel}
-                      </span>
+                      {availability && (
+                        <span
+                          className={`badge text-[11px] ${availability.bg} ${availability.text}`}
+                        >
+                          {availability.label}
+                        </span>
+                      )}
+                      {vehicleLabel && (
+                        <span className="badge bg-vertbrume-100 text-baobab-600 text-[11px]">
+                          {vehicleLabel}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-3 space-y-1.5 text-xs text-charbon-300">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{location}</span>
-                  </div>
+                  {location && (
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">{location}</span>
+                    </div>
+                  )}
                   {zones.length > 0 && (
                     <div className="flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-baobab-400 shrink-0" />
