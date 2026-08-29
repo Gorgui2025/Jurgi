@@ -22,9 +22,9 @@ function hasAny(text: string, words: string[]): boolean {
 function findIntent(q: string): string {
   if (hasAny(q, ["bonjour", "salut", "hello", "bonsoir", "coucou", "bjr", "slt"])) return "greeting";
   if (hasAny(q, ["video", "vidéo", "filmer", "video sur mon annonce", "publier des videos", "mettre une video", "envoyer une video", "telecharger une video"])) return "how_video";
+  if (hasAny(q, ["paiement", "payer", "payer mon abonnement", "mobile money", "wave", "orange money", "paiement wave", "transition", "activer mon compte", "code d'activation", "comment payer", "montant a verser"])) return "payment";
+  if (hasAny(q, ["prix", "abonnement", "plan", "forfait", "ndimbale", "offre annuelle", "annuelle", "essai", "combien coute", "tarif", "formule", "inscription gratuite", "gratuit"])) return "plans";
   if (hasAny(q, ["publier", "annonce", "mettre en vente", "vendre", "vendre mon", "create", "ajouter une annonce", "afficher mon produit"])) return "how_publish";
-  if (hasAny(q, ["paiement", "payer", "payer mon abonnement", "mobile money", "wave", "orange money", "paiement wave", "transition", "activer mon compte", "code d'activation", "abonnement"])) return "payment";
-  if (hasAny(q, ["prix", "abonnement", "plan", "forfait", "combien coute", "tarif", "formule", "inscription gratuite", "gratuit"])) return "plans";
   if (hasAny(q, ["profil professionnel", "profil pro", "compte professionnel", "compte pro", "devenir vet", "devenir veterinaire", "devenir transporteur", "devenir livreur", "devenir un vet", "devenir un veterinaire", "devenir un transporteur", "devenir un livreur", "espace pro", "creer un profil professionnel", "professionnel"])) return "professional_profile";
   if ((hasAny(q, ["profil"]) && hasAny(q, ["completer", "remplir", "modifier", "mettre a jour", "editer", "mon profil"]))) return "complete_profile";
   if (hasAny(q, ["vet", "veterinaire", "docteur", "soigner", "vaccination", "sante animale", "maladie", "soin"])) return "find_vet";
@@ -191,24 +191,41 @@ async function resolveAssistant(
           isTrialEligible: true,
           dailyListingsQuota: true,
           maxActiveListings: true,
+          maxPhotosPerListing: true,
+          maxVideosPerListing: true,
         },
       }).catch(() => []);
-      let answer =
-        "Voici les formules d'abonnement Jurgi :\n\n";
-      const fmtDur = (d: number) => (d >= 365 ? "1 an" : `${d} jours`);
-      if (plans.length === 0) {
-        answer += "Les détails des formules sont disponibles sur la page **Abonnements** (/abonnement). L'inscription de base et la publication d'annonces peuvent être gratuites selon votre plan.\n\nVous pouvez aussi payer via **Mobile Money** : 📞 **" + paymentPhone + "**.";
+      const fmtDur = (d: number) => (d >= 365 ? "12 mois (1 an)" : `${d} jours`);
+      const ndimbale = plans.find((p) => p.name.toLowerCase().includes("ndimbale"));
+      const askingNdimbale = ndimbale && /ndimbale|offre annuelle|formule annuelle|abonnement annuel/.test(normalize(question));
+      let answer: string;
+
+      if (askingNdimbale && ndimbale) {
+        answer =
+          "**Jurgi Ndimbale** est l'offre annuelle spéciale de la plateforme : 🎯\n\n" +
+          `• 💰 **${ndimbale.price.toLocaleString("fr-FR")} FCFA** pour une durée de **${fmtDur(ndimbale.durationDays)}**\n` +
+          `• 📝 **${ndimbale.maxActiveListings} annonces actives** simultanément\n` +
+          `• 🔄 **${ndimbale.dailyListingsQuota} nouvelle publication par jour**\n` +
+          `• 📸 **${ndimbale.maxPhotosPerListing} photos** et **${ndimbale.maxVideosPerListing} vidéo** par annonce\n` +
+          (ndimbale.isTrialEligible ? "• 🎁 **Essai gratuit de 7 jours** pour tester l'offre\n" : "") +
+          (ndimbale.description ? `• 💡 ${ndimbale.description}\n` : "") +
+          "\nC'est l'offre la plus **économique** pour publier régulièrement toute l'année. Vous pouvez la souscrire sur la page **Abonnements** (/abonnement) — paiement via **Mobile Money** : 📞 **" + paymentPhone + "**.";
       } else {
-        answer += plans
-          .map((p) => {
-            const extra: string[] = [];
-            if (p.maxActiveListings) extra.push(`${p.maxActiveListings} annonces actives`);
-            if (p.dailyListingsQuota) extra.push(`${p.dailyListingsQuota} nouvelle publication/jour`);
-            const desc = extra.length ? " (" + extra.join(", ") + ")" : "";
-            return `• **${p.name}** — ${p.price.toLocaleString("fr-FR")} FCFA / ${fmtDur(p.durationDays)}${p.isTrialEligible ? " (essai gratuit 7 j)" : ""}${desc}${p.description ? " — " + p.description : ""}`;
-          })
-          .join("\n");
-        answer += "\n\nVous pouvez payer via **Mobile Money** : 📞 **" + paymentPhone + "**.";
+        answer = "Voici les formules d'abonnement Jurgi :\n\n";
+        if (plans.length === 0) {
+          answer += "Les détails des formules sont disponibles sur la page **Abonnements** (/abonnement). L'inscription de base et la publication d'annonces peuvent être gratuites selon votre plan.\n\nVous pouvez aussi payer via **Mobile Money** : 📞 **" + paymentPhone + "**.";
+        } else {
+          answer += plans
+            .map((p) => {
+              const extra: string[] = [];
+              if (p.maxActiveListings) extra.push(`${p.maxActiveListings} annonces actives`);
+              if (p.dailyListingsQuota) extra.push(`${p.dailyListingsQuota} nouvelle publication/jour`);
+              const desc = extra.length ? " (" + extra.join(", ") + ")" : "";
+              return `• **${p.name}** — ${p.price.toLocaleString("fr-FR")} FCFA / ${fmtDur(p.durationDays)}${p.isTrialEligible ? " (essai gratuit 7 j)" : ""}${desc}${p.description ? " — " + p.description : ""}`;
+            })
+            .join("\n");
+          answer += "\n\nVous pouvez payer via **Mobile Money** : 📞 **" + paymentPhone + "**.";
+        }
       }
       return {
         intent,
