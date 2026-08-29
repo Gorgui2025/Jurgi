@@ -19,6 +19,7 @@ import {
 
 export interface DeliveryProfile {
   id: string
+  userId: string | null
   name: string
   photo: string | null
   zone: string
@@ -59,19 +60,32 @@ export default function LivreurDetailClient({ initialProfile }: { initialProfile
   }
 
   const handleInternalMessage = async () => {
-    if (!session?.user || !profile) return
+    if (!session?.user?.id || !profile?.userId) return
     try {
       const res = await fetch("/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          recipientId: profile.id,
-          initialMessage: contactMessage || "Bonjour !",
+          senderId: session.user.id,
+          receiverId: profile.userId,
         }),
       })
       if (res.ok) {
         const data = await res.json()
-        router.push(`/messages/${data.conversationId}`)
+        const conversationId = data.id
+        const message = (contactMessage || "").trim()
+        if (message) {
+          await fetch("/api/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              conversationId,
+              senderId: session.user.id,
+              content: message,
+            }),
+          })
+        }
+        router.push(`/messages/${conversationId}`)
       }
     } catch (err) {
       console.error("Erreur création conversation", err)

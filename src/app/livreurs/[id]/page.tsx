@@ -23,6 +23,7 @@ function parseJson(value: string | null, fallback: unknown[] = []): string[] {
 
 interface RawProfile {
   id: string;
+  userId: string;
   displayName: string | null;
   photo: string | null;
   bio: string | null;
@@ -46,6 +47,7 @@ async function getRawProfile(id: string): Promise<RawProfile | null> {
     where: { id },
     select: {
       id: true,
+      userId: true,
       displayName: true,
       photo: true,
       bio: true,
@@ -71,6 +73,7 @@ function toDeliveryProfile(p: RawProfile): DeliveryProfile {
   const zones = parseJson(p.zones);
   return {
     id: p.id,
+    userId: p.userId,
     name: p.displayName || p.user?.name || "Livreur",
     photo: p.photo,
     zone: zones[0] || "",
