@@ -80,7 +80,35 @@ export interface QuotaResult {
   remainingDaily: number;
 }
 
+export async function syncQuotaStatus(userId: string): Promise<void> {
+  const plan = await resolveUserPlan(userId);
+
+  const active = await prisma.listing.findMany({
+    where: { userId, status: { in: ["active", "SUSPENDED_BY_QUOTA"] } },
+    orderBy: [{ status: "asc" }, { createdAt: "asc" }],
+  });
+
+  const activeItems = active.filter((l) => l.status === "active");
+  let suspended = active.filter((l) => l.status === "SUSPENDED_BY_QUOTA");
+
+  if (activeItems.length > plan.maxActiveListings) {
+    const excess = activeItems.length - plan.maxActiveListings;
+    await prisma.listing.updateMany({
+      where: { id: { in: activeItems.slice(0, excess).map((l) => l.id) } },
+      data: { status: "SUSPENDED_BY_QUOTA" },
+    });
+  } else if (activeItems.length < plan.maxActiveListings && suspended.length > 0) {
+    const slots = plan.maxActiveListings - activeItems.length;
+    const toReactivate = suspended.slice(-slots);
+    await prisma.listing.updateMany({
+      where: { id: { in: toReactivate.map((l) => l.id) } },
+      data: { status: "active" },
+    });
+  }
+}
+
 export async function checkListingQuota(userId: string): Promise<QuotaResult> {
+  await syncQuotaStatus(userId);
   const plan = await resolveUserPlan(userId);
 
   const activeListings = await prisma.listing.count({

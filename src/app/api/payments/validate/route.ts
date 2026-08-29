@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { syncQuotaStatus } from "@/lib/listingQuota";
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,6 +78,8 @@ export async function POST(req: NextRequest) {
           newValue: JSON.stringify({ rejectionReason, rolledBackPayment: !!existingPayment }),
         },
       });
+
+      await syncQuotaStatus(pr.userId);
 
       return NextResponse.json({ status: "rejected", id: updated.id, rolledBack: !!existingPayment });
     }
@@ -158,6 +161,8 @@ export async function POST(req: NextRequest) {
         newValue: JSON.stringify({ planName: pr.plan.name, amount: pr.amount, activationCode: pr.activationCode }),
       },
     });
+
+    await syncQuotaStatus(pr.userId);
 
     if (pr.plan.slug === "livreur") {
       const deliveryProfile = await prisma.deliveryProfile.findUnique({ where: { userId: pr.userId } });

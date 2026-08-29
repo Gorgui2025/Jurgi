@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { africaDakarDayStart } from "@/lib/listingQuota";
+import { africaDakarDayStart, syncQuotaStatus } from "@/lib/listingQuota";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const all = searchParams.get("all");
 
   if (userId) {
+    await syncQuotaStatus(userId);
     const subscription = await prisma.subscription.findFirst({
       where: { userId, status: status || "active" },
       include: { plan: true },
@@ -136,6 +137,7 @@ export async function POST(request: NextRequest) {
           autoRenew: false,
         },
       });
+      await syncQuotaStatus(userId);
       return NextResponse.json({ subscription: sub, requiresPayment: false });
     }
 

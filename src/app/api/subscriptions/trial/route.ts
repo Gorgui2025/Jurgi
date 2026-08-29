@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { syncQuotaStatus } from "@/lib/listingQuota";
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,6 +69,8 @@ export async function POST(request: NextRequest) {
         data: JSON.stringify({ subscriptionId: sub.id, planSlug: plan.slug, durationDays }),
       },
     });
+
+    await syncQuotaStatus(userId);
 
     return NextResponse.json({ subscription: sub, message: `Essai ${plan.name} activé pour ${durationDays} jours` });
   } catch (error) {

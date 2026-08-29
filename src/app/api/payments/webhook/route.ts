@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
+import { syncQuotaStatus } from "@/lib/listingQuota";
 
 export async function POST(request: NextRequest) {
   try {
@@ -109,4 +110,6 @@ async function processPayment(payment: any, webhookData: any) {
       data: JSON.stringify({ paymentId: payment.id, planSlug: payment.plan.slug }),
     },
   });
+
+  await syncQuotaStatus(payment.userId);
 }
