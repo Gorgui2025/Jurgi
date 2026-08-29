@@ -171,7 +171,26 @@ function LivreursContent() {
     try {
       const res = await fetch(`/api/delivery-profiles?${params.toString()}`);
       const data = await res.json();
-      const items: DeliveryDriver[] = data.drivers || data.profiles || [];
+      const rawItems = (data.drivers ||
+        data.profiles ||
+        []) as Array<
+        DeliveryDriver & {
+          displayName?: string | null;
+          photo?: string | null;
+          user?: {
+            name?: string | null;
+            avatar?: string | null;
+            isVerified?: boolean;
+            lastSeen?: string | null;
+          } | null;
+        }
+      >;
+      const items: DeliveryDriver[] = rawItems.map((d) => ({
+        ...d,
+        name: d.displayName || d.user?.name || null,
+        avatar: d.photo || d.user?.avatar || null,
+        isVerified: d.isVerified ?? d.user?.isVerified ?? false,
+      }));
       const total_count: number = data.total || items.length;
 
       if (append) {
