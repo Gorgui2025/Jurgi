@@ -5,8 +5,8 @@ export default function AProposPage() {
     <div className="page-container max-w-4xl mx-auto">
       {/* Hero */}
       <div className="text-center mb-12">
-        <div className="w-16 h-16 bg-baobab-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-white font-bold text-3xl">J</span>
+        <div className="w-16 h-16 bg-baobab-500 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden">
+          <img src="/assets/brand/jurgi-logo-192.png" alt="Logo Jurgi" width={64} height={64} className="h-full w-full object-cover" />
         </div>
         <h1 className="text-3xl font-bold text-charbon-500 mb-3">
           Jurgi — Tout l&apos;écosystème de l&apos;élevage, au même endroit

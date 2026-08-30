@@ -60,9 +60,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 bg-baobab-500 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">J</span>
-              </div>
+              <img src="/assets/brand/jurgi-logo.png" alt="Logo Jurgi" width={36} height={36} className="h-9 w-9 rounded-xl object-contain" />
               <span className="text-xl font-bold">{name}</span>
             </Link>
             <p className="text-sm text-beigebrume-300 leading-relaxed mb-4">

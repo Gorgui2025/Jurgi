@@ -62,8 +62,8 @@ export default function MotDePasseOubliePage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-baobab-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">J</span>
+          <div className="w-14 h-14 bg-baobab-500 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden">
+            <img src="/assets/brand/jurgi-logo-192.png" alt="Logo Jurgi" width={56} height={56} className="h-full w-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-charbon-500">Mot de passe oublié</h1>
           <p className="text-sm text-charbon-300 mt-1">

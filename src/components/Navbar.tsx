@@ -78,10 +78,14 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-beigebrume-200">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-9 h-9 bg-baobab-500 rounded-xl flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-lg">J</span>
-            </div>
+          <Link href="/" aria-label="Jurgi — Accueil" className="flex items-center gap-2.5 shrink-0">
+            <img
+              src="/assets/brand/jurgi-logo.png"
+              alt="Logo Jurgi"
+              width={40}
+              height={40}
+              className="h-9 w-9 rounded-xl object-contain"
+            />
             <span className="text-xl font-bold text-charbon-500 hidden sm:block">Jurgi</span>
           </Link>
 

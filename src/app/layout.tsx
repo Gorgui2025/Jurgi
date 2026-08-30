@@ -17,7 +17,11 @@ export const metadata: Metadata = {
   description:
     "Trouvez des animaux, aliments, équipements, services vétérinaires, transporteurs et partenaires pour votre élevage au Sénégal.",
   manifest: "/manifest.json",
-  icons: { icon: "/favicon.svg" },
+  icons: {
+    icon: "/assets/brand/jurgi-logo.png",
+    shortcut: "/assets/brand/jurgi-logo.png",
+    apple: "/assets/brand/jurgi-logo.png",
+  },
   alternates: {
     canonical: "/",
   },
@@ -67,7 +71,7 @@ export default function RootLayout({
               "@type": "Organization",
               name: "Jurgi",
               url: BASE_URL,
-              logo: `${BASE_URL}/favicon.svg`,
+              logo: `${BASE_URL}/assets/brand/jurgi-logo.png`,
               description:
                 "Tout l'écosystème de l'élevage au Sénégal : animaux, aliments, équipements, vétérinaires, transporteurs et institutionnels.",
               areaServed: "Sénégal",

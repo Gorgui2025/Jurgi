@@ -146,8 +146,8 @@ export default function InscriptionPage() {
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-baobab-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">J</span>
+          <div className="w-14 h-14 bg-baobab-500 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden">
+            <img src="/assets/brand/jurgi-logo-192.png" alt="Logo Jurgi" width={56} height={56} className="h-full w-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-charbon-500">Créer un compte</h1>
           <p className="text-sm text-charbon-300 mt-1">
