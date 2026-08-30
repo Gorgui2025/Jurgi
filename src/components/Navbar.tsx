@@ -86,7 +86,7 @@ export default function Navbar() {
               height={40}
               className="h-9 w-9 rounded-xl object-contain"
             />
-            <span className="text-xl font-bold text-charbon-500 hidden sm:block">Jurgi</span>
+            <span className="text-xl font-bold text-baobab-500">Jurgi</span>
           </Link>
 
           <div className="hidden md:flex flex-1 max-w-lg mx-8">
