@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { ArrowLeft, ArrowRight, Upload, ImagePlus, Film, X, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { uploadDirectCloudinary } from "@/lib/uploadClient";
 
 const DOMAINS = [
@@ -137,6 +138,7 @@ function VideoPreview({ src, onRemove }: { src: string; onRemove: () => void }) 
 
 export default function PublierPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(0);
@@ -584,7 +586,9 @@ export default function PublierPage() {
                 if (res.ok) { setSubmitted(true); }
                 else {
                   const d = await res.json();
-                  if (d.error === "daily_quota_reached" || d.error === "quota_reached") {
+                  if (d.authRequired) {
+                    router.push("/connexion?redirect=/publier");
+                  } else if (d.error === "daily_quota_reached" || d.error === "quota_reached") {
                     setQuotaError({ message: d.message || "Limite atteinte.", isDaily: d.error === "daily_quota_reached" });
                   } else {
                     alert(d.error || "Erreur lors de la publication");

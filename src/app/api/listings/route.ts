@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { checkListingQuota } from "@/lib/listingQuota";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -139,11 +141,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let resolvedUserId = userId;
-    if (!resolvedUserId) {
-      const anyUser = await prisma.user.findFirst();
-      resolvedUserId = anyUser?.id;
+    // Sécurité : on résout l'utilisateur authentifié depuis la session serveur.
+    // On ne fie JAMAIS au userId envoyé par le client pour la propriété de
+    // l'annonce, et on n'utilise JAMAIS findFirst() (qui attribuait les
+    // annonces au premier utilisateur de la base, ex. Thierno Madiou Bah).
+    let resolvedUserId: string;
+    const session = await getServerSession(authOptions).catch(() => null);
+    const sessionUserId = (session?.user as any)?.id;
+
+    if (!sessionUserId) {
+      return NextResponse.json(
+        { error: "Vous devez être connecté pour publier une annonce.", authRequired: true },
+        { status: 401 }
+      );
     }
+    resolvedUserId = sessionUserId;
 
     let resolvedCategoryId = categoryId;
     if (!resolvedCategoryId && domain) {

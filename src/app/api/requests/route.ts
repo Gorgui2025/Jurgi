@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -66,18 +68,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let resolvedUserId = userId;
-    if (!resolvedUserId) {
-      const anyUser = await prisma.user.findFirst();
-      resolvedUserId = anyUser?.id;
-    }
+    // Sécurité : résoudre l'utilisateur depuis la session serveur uniquement.
+    // Ne jamais utiliser findFirst() (attribue au premier utilisateur de la base).
+    const session = await getServerSession(authOptions).catch(() => null);
+    const sessionUserId = (session?.user as any)?.id;
 
-    if (!resolvedUserId) {
+    if (!sessionUserId) {
       return NextResponse.json(
-        { error: "Aucun utilisateur disponible" },
-        { status: 400 }
+        { error: "Vous devez être connecté pour publier une demande.", authRequired: true },
+        { status: 401 }
       );
     }
+    const resolvedUserId = sessionUserId;
 
     const newRequest = await prisma.request.create({
       data: {
