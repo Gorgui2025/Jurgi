@@ -158,6 +158,18 @@ export async function POST(request: NextRequest) {
     resolvedUserId = sessionUserId;
 
     let resolvedCategoryId = categoryId;
+
+    // Résoudre la catégorie à partir de l'ESPÈCE choisie (ex. "Ovin" → "Ovins"),
+    // pas seulement du domaine. Autrement findFirst() renvoyait toujours la
+    // première catégorie du domaine (ex. "Bovins") pour toutes les espèces.
+    if (!resolvedCategoryId) {
+      const speciesName = (species || "").trim().toLowerCase();
+      if (speciesName && domain) {
+        const cats = await prisma.category.findMany({ where: { domain } });
+        const match = cats.find((c) => c.name.toLowerCase() === speciesName || c.name.toLowerCase() === speciesName + "s");
+        resolvedCategoryId = match?.id;
+      }
+    }
     if (!resolvedCategoryId && domain) {
       const cat = await prisma.category.findFirst({ where: { domain } });
       resolvedCategoryId = cat?.id;
