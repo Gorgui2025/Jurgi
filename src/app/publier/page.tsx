@@ -508,7 +508,7 @@ export default function PublierPage() {
 
             <div>
               <label className="input-label">Mode de contact</label>
-              <div className="flex gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
                   { value: "phone_whatsapp", label: "Tél + WhatsApp" },
                   { value: "phone_only", label: "Téléphone" },
@@ -518,7 +518,7 @@ export default function PublierPage() {
                   <button
                     key={m.value}
                     onClick={() => setField("contactMode", m.value)}
-                    className={`flex-1 p-3 rounded-xl border-2 text-xs font-medium text-center transition-all ${
+                    className={`p-3 rounded-xl border-2 text-xs font-medium text-center transition-all ${
                       form.contactMode === m.value
                         ? "border-baobab-500 bg-baobab-50 text-baobab-600"
                         : "border-beigebrume-200 text-charbon-400 hover:border-baobab-200"
