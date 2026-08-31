@@ -209,6 +209,8 @@ export async function POST(request: NextRequest) {
     const parsedQty = quantity !== null && quantity !== undefined && quantity !== "" ? Number(quantity) : null;
     const safeQuantity = parsedQty !== null && Number.isFinite(parsedQty) && Number.isInteger(parsedQty) ? parsedQty : null;
 
+    const safePriceOnDemand = priceOnDemand === true || priceOnDemand === "true" || priceOnDemand === "on" || priceOnDemand === 1 || priceOnDemand === "1";
+
     const listing = await prisma.listing.create({
       data: {
         userId: resolvedUserId,
@@ -216,7 +218,7 @@ export async function POST(request: NextRequest) {
         title,
         description,
         price: safePrice,
-        priceOnDemand: priceOnDemand || false,
+        priceOnDemand: safePriceOnDemand,
         photos: JSON.stringify(photos || []),
         videos: JSON.stringify(videos || []),
         species: species || null,
