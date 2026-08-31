@@ -202,13 +202,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const parsedPrice =
+      price !== null && price !== undefined && price !== "" ? parseFloat(String(price).replace(",", ".")) : null;
+    const safePrice = parsedPrice !== null && Number.isFinite(parsedPrice) ? parsedPrice : null;
+
+    const parsedQty = quantity !== null && quantity !== undefined && quantity !== "" ? Number(quantity) : null;
+    const safeQuantity = parsedQty !== null && Number.isFinite(parsedQty) && Number.isInteger(parsedQty) ? parsedQty : null;
+
     const listing = await prisma.listing.create({
       data: {
         userId: resolvedUserId,
         categoryId: resolvedCategoryId,
         title,
         description,
-        price: price ? parseFloat(price) : null,
+        price: safePrice,
         priceOnDemand: priceOnDemand || false,
         photos: JSON.stringify(photos || []),
         videos: JSON.stringify(videos || []),
@@ -217,7 +224,7 @@ export async function POST(request: NextRequest) {
         sex: sex || null,
         age: age || null,
         weight: weight || null,
-        quantity: quantity ? parseInt(quantity) : null,
+        quantity: safeQuantity,
         region: region || null,
         commune: commune || null,
         contactMode: contactMode || "phone_whatsapp",
