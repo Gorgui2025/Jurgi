@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { ArrowLeft, ArrowRight, Upload, ImagePlus, Film, X, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { uploadDirectCloudinary } from "@/lib/uploadClient";
 
 const DOMAINS = [
   { value: "animaux", label: "Animaux", icon: "🐄" },
@@ -392,17 +393,10 @@ export default function PublierPage() {
                   for (const file of Array.from(files)) {
                     if (form.photos.length >= 6) break;
                     try {
-                      const fd = new FormData();
-                      fd.append("file", file);
-                      const res = await fetch("/api/upload", { method: "POST", body: fd });
-                      const data = await res.json();
-                      if (res.ok && data.url) {
-                        setForm((prev) => ({ ...prev, photos: [...prev.photos, data.url].slice(0, 6) }));
-                      } else {
-                        alert(data.error || "Erreur upload image");
-                      }
-                    } catch {
-                      alert("Erreur réseau lors de l'upload");
+                      const data = await uploadDirectCloudinary(file, "image");
+                      setForm((prev) => ({ ...prev, photos: [...prev.photos, data.url].slice(0, 6) }));
+                    } catch (err: any) {
+                      alert(err?.message || "Erreur upload image");
                     }
                   }
                   setUploadingImage(false);
@@ -446,16 +440,11 @@ export default function PublierPage() {
                   if (file.size > 50 * 1024 * 1024) { alert("Vidéo trop volumineuse (max 50 Mo)"); return; }
                   setUploadingVideo(true);
                   try {
-                    const fd = new FormData();
-                    fd.append("file", file);
-                    const res = await fetch("/api/upload", { method: "POST", body: fd });
-                    const data = await res.json();
-                    if (res.ok && data.url) {
-                      setForm((prev) => ({ ...prev, videos: [...prev.videos, data.url].slice(0, 2) }));
-                    } else {
-                      alert(data.error || "Erreur upload vidéo");
-                    }
-                  } catch { alert("Erreur réseau lors de l'upload"); }
+                    const data = await uploadDirectCloudinary(file, "video");
+                    setForm((prev) => ({ ...prev, videos: [...prev.videos, data.url].slice(0, 2) }));
+                  } catch (err: any) {
+                    alert(err?.message || "Erreur upload vidéo");
+                  }
                   setUploadingVideo(false);
                   e.target.value = "";
                 }}
